@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+*.sqlite
+*.sqlite-*
+.state/
+input-profiles/
+output/
+*.zip

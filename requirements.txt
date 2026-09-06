@@ -1,0 +1,2 @@
+# Needed only for optional R2 administration/upload scripts.
+boto3>=1.40,<2

@@ -1,0 +1,8 @@
+subtype	copy	abundance
+aminoglycoside|aph(6)-I	0.086	0.26922324398356484
+beta-lactam|bla*	0.084	0.2629622383095285
+beta-lactam|blaTEM	0.091	0.28487575816865585
+defensin|lysX	0.024	0.07513206808843671
+macrolide-lincosamide-streptogramin|macB	0.02	0.06261005674036392
+multidrug@RND|mexI	0.025	0.07826257092545491
+multidrug@RND|ttgB	0.025	0.07826257092545491
