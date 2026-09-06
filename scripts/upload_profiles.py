@@ -7,7 +7,7 @@ def files(root):
     with os.scandir(root) as entries:
         for entry in entries:
             if entry.is_dir(follow_symlinks=False):yield from files(entry.path)
-            elif entry.is_file(follow_symlinks=False) and pathlib.Path(entry.name).suffix.lower()=='.txt':yield pathlib.Path(entry.path)
+            elif entry.is_file(follow_symlinks=False) and entry.name.lower().endswith(('.txt','.txt.gz')):yield pathlib.Path(entry.path)
 
 def run(args,s3=None):
     source=pathlib.Path(args.input).resolve();state=pathlib.Path(args.state).resolve()
@@ -23,9 +23,9 @@ def run(args,s3=None):
     try:
         # Complete validation before any remote write, including duplicate accessions.
         for path in files(source):
-            if path.stat().st_size>1_000_000:raise ValueError(f'{path}: profile exceeds 1 MB')
+            if path.stat().st_size>5_000_000:raise ValueError(f'{path}: profile exceeds 5 MB')
             raw=path.read_bytes()
-            try:validate(raw)
+            try:validate(raw,accession(path))
             except Exception as e:raise ValueError(f'{path}: {e}') from e
             key=accession(path)
             try:db.execute('INSERT INTO plan VALUES (?,?,?)',(key,str(path),hashlib.sha256(raw).hexdigest()))
@@ -42,7 +42,7 @@ def run(args,s3=None):
         def put(item):
             key,path,digest=item;raw=pathlib.Path(path).read_bytes()
             if hashlib.sha256(raw).hexdigest()!=digest:raise ValueError(f'{path}: changed after validation; rerun')
-            kwargs=dict(Bucket=args.bucket,Key=key,Body=raw,ContentType='text/plain; charset=utf-8',CacheControl='public, max-age=300',Metadata={'sha256':digest})
+            kwargs=dict(Bucket=args.bucket,Key=key,Body=raw,ContentType='application/gzip' if key.endswith('.gz') else 'text/plain; charset=utf-8',CacheControl='public, max-age=300',Metadata={'sha256':digest})
             if not args.overwrite:kwargs['IfNoneMatch']='*'
             try:s3.put_object(**kwargs)
             except Exception as e:
@@ -65,7 +65,7 @@ def run(args,s3=None):
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
             pending=set()
             for key,path,digest in db.execute('SELECT accession,path,sha FROM plan ORDER BY accession'):
-                object_key=(prefix+'/' if prefix else '')+key+'.txt'
+                object_key=(prefix+'/' if prefix else '')+key+('.txt.gz' if path.lower().endswith('.txt.gz') else '.txt')
                 old=db.execute('SELECT sha FROM uploaded WHERE target=? AND key=?',(target,object_key)).fetchone()
                 if old and old[0]==digest:skipped+=1;continue
                 pending.add(pool.submit(put,(object_key,path,digest)))

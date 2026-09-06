@@ -1,3 +1,23 @@
+[metadata]
+project	PRJDA53873
+scientific_name	food metagenome
+biome	na: low-depth
+collection_date	na
+geo_loc_name	na
+lat_lon	na
+base	1253489280
+spot	15668616
+genome	0.3194
+spot_length	80.0
+genome_size	3924.0517
+univec	0.25
+sample	SAMD00008644
+platform	ILLUMINA
+library_source	GENOMIC
+library_selection	RANDOM
+published	2012-02-20 22:01:22
+
+[abundance]
 subtype	copy	abundance
 aminoglycoside|aph(6)-I	0.086	0.26922324398356484
 beta-lactam|bla*	0.084	0.2629622383095285

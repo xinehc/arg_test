@@ -6,5 +6,6 @@
   "profileCount": null,
   "typeCount": null,
   "subtypeCount": null,
-  "statsNote": "Exact accession lookup"
+  "statsNote": "Exact accession lookup",
+  "profileExtension": ".txt.gz"
 }

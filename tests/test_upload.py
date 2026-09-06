@@ -14,4 +14,13 @@ class UploadTests(unittest.TestCase):
             (source/'nested').mkdir();(source/'nested/drr000713.txt').write_bytes(SAMPLE.read_bytes())
             with self.assertRaisesRegex(ValueError,'Duplicate accession'):run(args,fake)
             self.assertEqual(len(fake.calls),1)
+    def test_gzip_object_is_preserved(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=pathlib.Path(temp);source=root/'input';source.mkdir()
+            raw=SAMPLE.with_suffix('.txt.gz').read_bytes();(source/'DRR000713.txt.gz').write_bytes(raw)
+            args=argparse.Namespace(input=str(source),state=str(root/'state.sqlite'),prefix='',bucket='argmap',workers=2,validate_only=False,overwrite=False)
+            fake=FakeS3();self.assertEqual(run(args,fake)['uploaded'],1)
+            self.assertEqual(fake.calls[0]['Key'],'DRR000713.txt.gz')
+            self.assertEqual(fake.calls[0]['ContentType'],'application/gzip')
+            self.assertNotIn('ContentEncoding',fake.calls[0]);self.assertEqual(fake.calls[0]['Body'],raw)
 if __name__=='__main__':unittest.main()

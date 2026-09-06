@@ -1,282 +1,70 @@
-# ARG Atlas — GitHub Pages + R2 TXT profiles
+# ARG Atlas: combined TXT.GZ profiles
 
-**This package is configured for your public R2 URL. Start with QUICK_DEPLOY.md.**
+A static GitHub Pages website with exact accession lookup, a globe with three real location categories, metadata, and ARG type/subtype distributions. No backend server or separate metadata index is needed.
 
-A build-free, two-page ARG abundance explorer. No Node installation, database,
-search index, API server, or Cloudflare Worker is required to host it.
+## Deploy an existing repository
 
-- `index.html`: basic collection information and exact accession search.
-- `profile.html?accession=DRR000713`: type and subtype abundance distributions,
-  type filtering, subtype search, relative percentages, and TSV download.
-- Search requests **one exact TXT object**, never lists or downloads the bucket.
-- Missing object (404): **Accession not found**. Network, CORS, and permission
-  problems produce a separate error rather than a false "not found" result.
-- A one-profile, 60-second browser cache avoids fetching it again immediately
-  after search. It is optional and not a database.
+1. Copy this package's contents into your repository, including `.github/workflows/pages.yml` and `site/`. Use the new workflow to replace the old metadata-build workflow.
+2. In GitHub Settings → Pages, select GitHub Actions as the source. Commit to `main` to deploy.
+3. Upload `DRR000713.txt.gz` (and your other accession files) into R2. An unchanged `.txt` object is not the file this version requests.
+4. Keep your bucket's public read URL and CORS policy configured. This package already uses `https://pub-459b51c080494f7c9867269d16d90670.r2.dev`.
 
-## Your bucket
+The optional `scripts/deploy_github.sh OWNER/REPO --public` creates a new repository using the GitHub CLI. For an existing repository, use your normal commit/push workflow.
 
-Bucket name: **argmap**
+## File format: exactly matches the attached example
 
-S3 API endpoint (for authenticated local scripts only):
-
-    https://47bd4c09e8ac6457ef317324342bb09a.r2.cloudflarestorage.com
-
-The `/argmap` URL you supplied is an S3 API address. It is **not the public read
-URL for the website**. Do not put API keys in HTML, JavaScript, GitHub Pages, or
-`site/config.json`.
-
-## Quick deployment — your files are already uploaded
-
-### 1. Get a public read URL
-
-In Cloudflare: **R2 → argmap → Settings**.
-
-- For testing, enable **Public Development URL** and copy its `https://pub-….r2.dev`
-  URL. Cloudflare rate-limits this endpoint and recommends it only for development.
-- For production, add a **Custom Domain**, such as `https://data.your-domain.org`.
-  The domain must be connected to your Cloudflare account.
-
-This setup is for publicly readable data. Enabling public access makes objects
-readable by anyone with their URL. The scripts do not enable public access for you.
-
-Verify that opening `YOUR_PUBLIC_URL/DRR000713.txt` displays or downloads that
-file. Do **not** append `/argmap` to the public URL unless it is literally a
-folder in your object names. The public domain already points to that bucket.
-
-### 2. Set the website data URL
-
-From the extracted project folder, run:
-
-```bash
-python3 scripts/configure_site.py --public-url https://YOUR_PUBLIC_BUCKET_HOST
-```
-
-Or edit `site/config.json` directly:
-
-```json
-{
-  "profileBaseUrl": "https://YOUR_PUBLIC_BUCKET_HOST",
-  "filePrefix": "",
-  "exampleAccession": "DRR000713",
-  "collectionLabel": "ARGmap accession collection",
-  "profileCount": null,
-  "typeCount": null,
-  "subtypeCount": null,
-  "statsNote": "Exact accession lookup"
-}
-```
-
-If the key in R2 is `profiles/DRR000713.txt`, set `filePrefix` to `profiles`, or
-pass `--prefix profiles` to the configuration script. For objects at the bucket
-root, leave it empty. Counts are optional and supplied by you; the website does
-not scan a million files to calculate collection totals. For example:
-
-```bash
-python3 scripts/configure_site.py --public-url https://YOUR_PUBLIC_BUCKET_HOST --count 1000000
-```
-
-**This package already uses your public R2 URL:**
-`https://pub-459b51c080494f7c9867269d16d90670.r2.dev`.
-It requests TXT files from the bucket root. There is no silent fallback to the
-bundled local example if an R2 request fails. The local file is only a test fixture.
-
-### 3. Allow your GitHub website to read the bucket (CORS)
-
-In **R2 → argmap → Settings → CORS policy**, paste `r2-cors.example.json` after
-replacing `YOUR_GITHUB_USERNAME`. Use the origin only:
-
-    https://YOUR_GITHUB_USERNAME.github.io
-
-Do not include `/REPOSITORY` in the CORS origin. If the website uses its own
-custom domain, use that origin instead. Add `http://localhost:8000` as another
-origin if you need to test against R2 locally. GET/HEAD are sufficient; browsers
-never need permission to upload files.
-
-There is also an optional authenticated helper:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requirements.txt
-# Set the environment variables described in the optional-upload section below.
-python3 scripts/configure_cors.py --origin https://YOUR_GITHUB_USERNAME.github.io
-```
-
-### 4. Upload the code to GitHub and enable Pages
-
-**Browser method, no local Git required:**
-
-1. Create a GitHub repository, e.g. `argmap`.
-2. Put this package's **contents** at the repository root, including the hidden
-   `.github/workflows/pages.yml` directory. Do not upload the ZIP itself or put
-   everything in another wrapper folder. A GitHub web upload can omit dotfiles;
-   verify that the workflow appears in the repository afterward.
-3. Go to **Settings → Pages → Build and deployment → Source → GitHub Actions**.
-4. Go to **Actions → Deploy ARG Atlas to GitHub Pages → Run workflow**, using `main`.
-5. The workflow publishes only `site/`. Its deployment output shows the website URL.
-
-**Command-line method:** install Git and the GitHub CLI (`gh`), configure your Git
-name/email if necessary, then:
-
-```bash
-gh auth login
-bash scripts/deploy_github.sh YOUR_GITHUB_USERNAME/argmap --public
-```
-
-This creates a **new** public repository and requests Pages deployment. Use
-`--private` only if your GitHub plan supports Pages from private repositories;
-a private repository does not itself make a Pages website or R2 data private.
-The helper refuses to replace an existing repository or remote. If the initial
-push workflow ran before Pages was enabled, the helper triggers it again afterward.
-You can also rerun it from Actions. Organization policies can require admin setup.
-
-For an **existing empty repository**, use Git directly from this folder:
-
-```bash
-git init -b main
-git add .
-git commit -m "Add static ARG Atlas"
-git remote add origin https://github.com/YOUR_GITHUB_USERNAME/argmap.git
-git push -u origin main
-```
-
-Then enable Pages with GitHub Actions as described above. Do not force-push over
-an existing project. Later updates to `site/` on `main` deploy automatically.
-
-## File format and naming
-
-Objects must be named **UPPERCASE_ACCESSION.txt**, for example `DRR000713.txt`.
-R2 object names are case-sensitive. User input is trimmed and uppercased; partial
-IDs, filename extensions, and gene names do not expand into accession matches.
-Only letters, digits, underscore, and hyphen are accepted in accessions.
-
-Supported UTF-8, tab-separated TXT headers:
+Object name: `DRR000713.txt.gz`. The decompressed UTF-8 text contains:
 
 ```text
-subtype\tcopy\tabundance
-aminoglycoside|aph(6)-I\t0.086\t0.26922324398356484
+[metadata]
+project	PRJDA53873
+scientific_name	food metagenome
+spot_length	80.0
+genome_size	3924.0517
+sample	SAMD00008644
+platform	ILLUMINA
+published	2012-02-20 22:01:22
+
+[abundance]
+subtype	copy	abundance
+aminoglycoside|aph(6)-I	0.086	0.26922324398356484
 ```
 
-Here `\t` means an actual TAB character; see `examples/DRR000713.txt` for a real file.
-The first `|` splits type from subtype. `multidrug@RND`, `bla*`, parentheses, and
-other subtype characters are preserved. `copy` is retained separately; charts use
-`abundance`. These normalized headers are also supported:
+The example above is abbreviated. `examples/DRR000713.txt.gz` is the original complete upload, unchanged, and `examples/DRR000713.txt` is its decompressed content. All 17 metadata fields appear in source order. No `field/value` header or metadata accession field is required; an optional `field<TAB>value` header is supported. New metadata keys are automatically displayed. Metadata values, including spaces, `na`, and decimal precision, remain strings. Separate fields and values with literal tabs, not spaces. Embedded tabs/newlines inside values are not supported.
 
-- `type`, `subtype`, `abundance`
-- `type`, `subtype`, `copy`, `abundance`
+Abundance accepts the attached `subtype / copy / abundance` header and splits each `type|subtype` at the first pipe. It also accepts `type / subtype / abundance` or `type / subtype / copy / abundance`. Duplicate metadata fields, duplicate ARG pairs, missing sections, malformed numbers, and mismatched metadata accessions are rejected. Plain legacy abundance tables still parse, but the configured object suffix is `.txt.gz`.
 
-Blank lines, Windows line endings, UTF-8 BOM, and scientific notation are accepted.
-Invalid/nonfinite/negative numbers and duplicate type/subtype pairs are rejected.
-The UI supports up to 10,000 rows per profile. Files are tab-delimited; arbitrary
-space-delimited text and CSV quoting are not supported. Percentages are computed
-from the selected profile's total, even when filtering its subtypes.
+## Loading and decompression
 
-If by "plain.txt" you mean **every object is literally named `plain.txt` inside
-accession folders**, the current key pattern must be changed to
-`ACCESSION/plain.txt`. The supplied code assumes the earlier example naming,
-`DRR000713.txt`.
+Search `drr000713` to request exactly `DRR000713.txt.gz`. HTTP 404 means accession not found. The browser decompresses gzip locally using DecompressionStream. It checks the gzip magic bytes before decompressing, so responses already decoded by HTTP Content-Encoding work too. Use a current Chrome, Edge, Firefox, or Safari; unsupported browsers get an explicit message.
 
-## Optional: upload new TXT profiles later
+Both received bytes and decompressed text have a 5 MB limit. Abundance tables support up to 10,000 rows. Only the last successfully loaded text is cached in sessionStorage for 60 seconds to reuse it when navigating from search to profile. No separate metadata request is made. Metadata is displayed as text, never interpreted as HTML. Download TXT includes both original sections.
 
-**Skip this section if all files are already in argmap.**
+Keep gzip objects as `Content-Type: application/gzip` without `Content-Encoding`; the included uploader does this. Existing objects correctly served with `Content-Encoding: gzip` also work because the loader detects the resulting bytes.
 
-The uploader sends original TXT bytes; no JSON conversion is needed. It uses a
-local SQLite checkpoint only for upload progress, not for the deployed website.
-It walks input folders incrementally, validates all files before remote writes,
-and rejects duplicate accession filenames in separate folders. It holds only a
-bounded number of uploads in memory. There is no recursive remote bucket scan.
+## Configuration
 
-Python 3.10+ is required. Install the optional dependencies in a virtual environment:
+`site/config.json` specifies `profileBaseUrl`, `filePrefix`, and `profileExtension` (default `.txt.gz`). To use plain objects explicitly, set `profileExtension` to `.txt`. Files should have uppercase accession names with lowercase extensions. Do not include bucket credentials in this file or in website JavaScript.
+
+## Upload profiles (optional)
+
+Install dependencies with `python -m pip install -r requirements.txt`. Set `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET` in your local shell, following `.env.example`.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requirements.txt
+python scripts/upload_profiles.py --input /path/to/gzip-profiles --validate-only
+python scripts/upload_profiles.py --input /path/to/gzip-profiles
 ```
 
-Create bucket-scoped R2 access keys locally. Set these environment variables in
-your terminal (the endpoint and bucket are already the script defaults):
+Use a folder containing only one file per accession. The uploader supports `.txt.gz` and `.txt`, validates decoded content before upload, preserves the original bytes and suffix, and resumes using a local SQLite checkpoint. It does not list or delete bucket objects. `--overwrite` explicitly allows replacement. Do not point it at `examples/`, which includes both formats for the same accession.
 
-```bash
-export R2_ENDPOINT_URL=https://47bd4c09e8ac6457ef317324342bb09a.r2.cloudflarestorage.com
-export R2_BUCKET=argmap
-export AWS_ACCESS_KEY_ID=YOUR_R2_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=YOUR_R2_SECRET_ACCESS_KEY
-```
+## Preview locally
 
-`.env.example` documents them; scripts do not automatically load `.env` files.
-Do not commit actual credentials. The GitHub Pages workflow needs no R2 secrets.
+Serve the `site/` folder over HTTP with `python -m http.server 8000 --directory site`. To use the included local sample instead of R2, temporarily set `profileBaseUrl` to `./data` in `site/config.json`. Restore the R2 URL before deploying. Do not open index.html directly as a file URL.
 
-```bash
-# Local validation only; no credentials or network required.
-python3 scripts/upload_profiles.py --input /path/to/txt-profiles --validate-only
+## Verification
 
-# Upload; rerun the same command to resume using .state/uploads.sqlite.
-python3 scripts/upload_profiles.py --input /path/to/txt-profiles --workers 8
-```
+`node --test tests/*.test.mjs` exercises the uploaded gzip, all metadata fields, ARG parsing, exact lookup, already-decoded responses, corrupted gzip, expansion limits and invalid records. `python tests/test_upload.py` checks uploader object naming, content type, duplicate detection and resumable uploads. Live R2 access and browser visual QA have not been performed for this package.
 
-Use `--prefix profiles` if your site config uses that folder. Existing remote
-objects are not overwritten by default. Use `--overwrite` only for intended
-updates. Unchanged locally checkpointed files are skipped. Keep the checkpoint
-outside the input folder and preserve it across runs. The checkpoint assumes
-completed objects have not subsequently been removed or altered remotely; remove
-or use a new checkpoint if you must reconcile a remotely changed bucket.
+The globe reads `site/assets/globe/locations.tsv` with columns `biome`, `lat`, `lon`, `size`. Marker area uses log2(1 + size), with visible minimum and maximum radii. Zoom supports wheel, pinch, and buttons, clamped to 1–3×. The supplied 13,521 points all have size 1. Replace the TSV to update the map; coordinates must be valid decimal degrees and sizes finite and nonnegative. Categories are host-associated (red), environmental (blue), and engineered (yellow). The website and public R2 files are publicly readable when deployed through GitHub Pages.
 
-The uploader uses bounded parallelism (default 8, maximum 32), SDK retries, and
-SHA-256 metadata to recover a completed upload whose local acknowledgment was
-lost. No remote files are deleted. Uploaded files receive a five-minute cache
-lifetime; allow that time for changed profiles to appear. For uploads from other
-tools, configure their cache headers or purge your CDN cache when updating data.
-
-At one million profiles, validate a representative subset first and monitor R2
-storage/request usage. No million-object throughput benchmark was run here.
-
-## Local preview and checks
-
-The website needs HTTP rather than double-clicking `index.html` (browsers restrict
-fetch from `file://`). This temporary preview server is only for development:
-
-```bash
-python3 -m http.server 8000 --directory site
-```
-
-Open `http://localhost:8000` in your browser. No development server is needed once
-GitHub Pages hosts the site.
-
-Optional checks, using Node 20+ and Python 3.10+:
-
-```bash
-node --test tests/profile.test.mjs
-python3 -m unittest discover -s tests -p 'test_*.py'
-```
-
-Checked locally: TXT parsing, native field preservation, exact URL construction,
-GitHub repository subpaths, 404 vs network/permission errors, upload checkpoints,
-and duplicate accession rejection. R2 upload and GitHub deployment require your
-accounts and have not been executed for you. The existing ChatGPT-hosted site is
-unchanged by this standalone export.
-
-## Files
-
-| File | Purpose |
-| --- | --- |
-| `site/index.html` | Accession search page |
-| `site/profile.html` | Dedicated profile display |
-| `site/assets/common.mjs` | TXT parser and exact object retrieval |
-| `site/assets/profile.mjs` | Type/subtype charts, filtering and downloads |
-| `site/config.json` | Public read URL and collection information |
-| `.github/workflows/pages.yml` | Automatic static deployment |
-| `scripts/configure_site.py` | Set public bucket URL |
-| `scripts/configure_cors.py` | Add bucket read-origin rule |
-| `scripts/upload_profiles.py` | Optional resumable TXT uploader |
-| `scripts/deploy_github.sh` | Create a new repository and enable Pages |
-
-## Official references
-
-- https://developers.cloudflare.com/r2/buckets/public-buckets/
-- https://developers.cloudflare.com/r2/buckets/cors/
-- https://developers.cloudflare.com/r2/examples/aws/boto3/
-- https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
-# arg_test
-# arg_test
+The type filter supports multiple selections (union of selected types); clear selection returns all subtypes. Percentages use the whole profile total. Abundance displays up to three decimal places, with values below 0.0005 shown as <0.001; downloads preserve source precision. Total copy sums all copy values, or reports Not available when any row lacks a copy value.
