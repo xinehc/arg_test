@@ -1,6 +1,6 @@
 # ARG Atlas: combined TXT.GZ profiles
 
-A static GitHub Pages website with exact accession lookup, a globe with three real location categories, metadata, and ARG type/subtype distributions. No backend server or separate metadata index is needed.
+A static GitHub Pages website with exact accession lookup, a globe with real sample locations, metadata, and ARG type/subtype distributions. No backend server or separate metadata index is needed.
 
 ## Deploy an existing repository
 
@@ -65,6 +65,6 @@ Serve the `site/` folder over HTTP with `python -m http.server 8000 --directory 
 
 `node --test tests/*.test.mjs` exercises the uploaded gzip, all metadata fields, ARG parsing, exact lookup, already-decoded responses, corrupted gzip, expansion limits and invalid records. `python tests/test_upload.py` checks uploader object naming, content type, duplicate detection and resumable uploads. Live R2 access and browser visual QA have not been performed for this package.
 
-The globe reads `site/assets/globe/locations.tsv` with columns `biome`, `lat`, `lon`, `size`. Marker area uses log2(1 + size), with visible minimum and maximum radii. Zoom supports wheel, pinch, and buttons, clamped to 1–3×. The supplied 13,521 points all have size 1. Replace the TSV to update the map; coordinates must be valid decimal degrees and sizes finite and nonnegative. Categories are host-associated (red), environmental (blue), and engineered (yellow). The website and public R2 files are publicly readable when deployed through GitHub Pages.
+The globe reads `site/assets/globe/locations.tsv` with columns `lat`, `lon`, `size`. Marker area uses log2(1 + size), with visible minimum and maximum radii. The globe is a large, transparent decorative background with random automatic rotation and no zoom or drag controls. It respects reduced-motion preferences. The supplied 12,773 points all have size 1. Replace the TSV to update the map; coordinates must be valid decimal degrees and sizes finite and nonnegative. All sample points use muted teal (`#427a68`); no biome column is needed. The website and public R2 files are publicly readable when deployed through GitHub Pages.
 
 The type filter supports multiple selections (union of selected types); clear selection returns all subtypes. Percentages use the whole profile total. Abundance displays up to three decimal places, with values below 0.0005 shown as <0.001; downloads preserve source precision. Total copy sums all copy values, or reports Not available when any row lacks a copy value.

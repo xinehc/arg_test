@@ -4,10 +4,11 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ARG Atlas | Accession search</title>
   <meta name="description" content="Find an accession and explore its antibiotic resistance gene abundance by type and subtype.">
-  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css">
-  <script type="module" src="./assets/search.mjs"></script><script type="module" src="./assets/globe.mjs"></script>
+  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css?v=logo-footer-3">
+  <script type="module" src="./assets/search.mjs?v=home-3"></script><script type="module" src="./assets/globe.mjs?v=connected-1"></script>
 </head>
 <body class="atlas-home">
+  <div class="globe-background" aria-hidden="true"><canvas id="globe"></canvas></div>
   <header><a class="brand" href="./index.html"><img src="./favicon.svg" width="37" height="37" alt="">ARG<span>atlas</span></a><span class="header-sub">Antibiotic resistance gene explorer</span><a class="template-link" href="./profile-template.txt" download>Data template <span aria-hidden="true">↗</span></a></header>
   <main class="home-main">
     <section class="home-hero" aria-labelledby="home-title">
@@ -25,18 +26,22 @@
           <div class="search-hint" id="example-wrap" hidden>Try an example <button id="example" type="button"></button></div>
         </div>
       </div>
-      <figure class="globe-figure">
-        <canvas id="globe" role="img" aria-label="Rotating globe with supplied host-associated, environmental, and engineered locations"></canvas>
-        <div id="globe-legend" class="globe-legend" hidden><span><i class="host-marker"></i>Host-associated</span><span><i class="environment-marker"></i>Environmental</span><span><i class="engineered-marker"></i>Engineered</span></div><figcaption><span id="globe-caption">Loading sample locations…</span><button id="globe-toggle" type="button" hidden aria-pressed="false">Pause rotation</button></figcaption>
-      </figure>
     </section>
-    <section class="home-info" aria-label="Collection information">
-      <div class="collection-info"><span class="info-label">COLLECTION</span><strong id="collection">ARGmap accession collection</strong><span id="stats-note">Exact accession lookup</span></div>
-      <div><span class="info-label">EXPLORE</span><strong>Types &amp; subtypes</strong><span>Resistance classes and individual genes</span></div>
-      <div><span class="info-label">PROFILE</span><strong>Abundance distribution</strong><span>Read the profile. Compare its composition.</span></div>
-      <div id="collection-counts" hidden><span class="info-label">COLLECTION COUNTS</span><strong id="profile-count">—</strong><span><span id="type-count">—</span> types · <span id="subtype-count">—</span> subtypes</span></div>
-    </section>
-    <footer><span>ARG atlas</span><span>Antibiotic resistance gene abundance</span></footer>
+    <footer class="home-lab" aria-label="Laboratory and university">
+      <svg class="logo-filters" aria-hidden="true" width="0" height="0" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="lab-ink" color-interpolation-filters="sRGB">
+            <feFlood flood-color="#427a68"/>
+            <feComposite in2="SourceAlpha" operator="in"/>
+          </filter>
+        </defs>
+      </svg>
+      <div class="lab-logos">
+        <img class="lab-logo" src="./assets/logos/hku-team-updated.png" width="720" height="707" alt="Environmental Microbiome Engineering and Biotechnology Lab at HKU" loading="lazy" decoding="async">
+        <img class="lab-logo lab-logo-university" src="./assets/logos/hku-university.png" width="755" height="849" alt="The University of Hong Kong bilingual logo" loading="lazy" decoding="async">
+      </div>
+      <div class="lab-wordmark"><p>Environmental Microbiome<br>Engineering &amp; Biotechnology Lab</p><span>The University of Hong Kong</span></div>
+    </footer>
     <noscript>Enable JavaScript to search accessions and display profiles.</noscript>
   </main>
 </body>
