@@ -1,5 +1,5 @@
 import {drawLocationMarkers,horizonOpacity} from './globe-renderer.mjs?v=hex-3';
-import {buildLandCells,projectLandCell} from './globe-land.mjs?v=gap-2';
+import {buildLandCells,projectLandCell} from './globe-land.mjs?v=gap-1';
 import {parseLocations} from './globe-locations.mjs';
 // Adapted from ContinentHexbins / Scene in the user-supplied globe-main/index.tsx.
 // The supplied Fibonacci land mask classifies a connected spherical honeycomb.
@@ -19,15 +19,11 @@ async function start(){
     markers=parseLocations(await locationResponse.text());
   } catch { /* The decorative land layer can render without sample locations. */ }
 
-  // Give every page load a genuinely different 3D motion. In addition to yaw,
-  // pitch and roll are randomized and then drift independently, so the automatic path
-  // can arc diagonally instead of always sweeping horizontally around the equator.
-  let angle=Math.random()*Math.PI*2,tilt=(Math.random()*.9)-.45,roll=(Math.random()*Math.PI*2)-Math.PI;
-  let tiltVelocity=(Math.random()<.5?-1:1)*(.000006+Math.random()*.000012);
+  // Choose the orientation and spin once per load, then keep a fixed axis,
+  // speed and direction throughout the animation.
+  let angle=Math.random()*Math.PI*2;
+  const tilt=(Math.random()*.9)-.45,roll=(Math.random()*Math.PI*2)-Math.PI;
   const yawVelocity=(Math.random()<.5?-1:1)*(.000028+Math.random()*.000036);
-  const rollVelocity=(Math.random()<.5?-1:1)*(.000006+Math.random()*.000014);
-  const yawPhase=Math.random()*Math.PI*2,tiltPhase=Math.random()*Math.PI*2,rollPhase=Math.random()*Math.PI*2;
-  let motionTime=0;
   let size=0,frame=0,last=0,visible=true,paused=reduced.matches;
   // Fixed scale: CSS sizes this decorative canvas to the viewport.
   const zoom=1;
@@ -52,7 +48,7 @@ async function start(){
       ctx.closePath();
       const eased=horizonOpacity(depth-.015,.14);
       // Filled hexagon shapes with no outlines.
-      ctx.fillStyle='rgb(106,133,121)';ctx.globalAlpha=(.10+depth*.12)*eased;ctx.fill();
+      ctx.fillStyle='#1e4033';ctx.globalAlpha=(.10+depth*.12)*eased;ctx.fill();
     }
     ctx.globalAlpha=1;
     drawLocationMarkers(ctx,markers,pointColor,{ca,sa,ct,st,cr,sr,cx,cy,r,size,zoom});
@@ -60,14 +56,8 @@ async function start(){
   function animate(now){
     frame=0;if(!visible||document.hidden||paused)return;
     if(now-last>=16){
-      const dt=Math.min(now-last,60);motionTime+=dt;
-      // Slowly modulate each axis so even one page load does not settle into a fixed orbit.
-      angle+=dt*yawVelocity*(.82+.18*Math.sin(motionTime*.00035+yawPhase));
-      tilt+=dt*(tiltVelocity+.000006*Math.sin(motionTime*.00022+tiltPhase));
-      roll+=dt*rollVelocity*(.72+.28*Math.sin(motionTime*.00027+rollPhase));
-      // Softly bounce the pitch before the poles; this keeps motion varied without flipping abruptly.
-      if(tilt>.72){tilt=.72;tiltVelocity=-Math.abs(tiltVelocity);}
-      else if(tilt<-.72){tilt=-.72;tiltVelocity=Math.abs(tiltVelocity);}
+      const dt=Math.min(now-last,60);
+      angle=(angle+dt*yawVelocity)%(Math.PI*2);
       last=now;draw();
     }
     frame=requestAnimationFrame(animate);

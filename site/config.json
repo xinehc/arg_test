@@ -7,5 +7,6 @@
   "typeCount": null,
   "subtypeCount": null,
   "statsNote": "Exact accession lookup",
-  "profileExtension": ".txt.gz"
+  "profileExtension": ".txt.gz",
+  "fullProfilesUrl": "https://zenodo.org/records/22330481"
 }
