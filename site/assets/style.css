@@ -342,3 +342,7 @@ body{margin:0;background:var(--background);color:#20382e;font-family:Arial,Helve
 
 /* Match the Resistance abundance intro-to-panel spacing to Sample metadata. */
 .distribution-workbench>.distribution-toolbar{padding-bottom:0}
+
+.profile-page .profile-action{display:inline-flex;align-items:center;gap:9px;min-height:40px;box-sizing:border-box;padding:9px 13px;border:1px solid #d5e3dc;border-radius:8px;background:#f7faf9;color:#315f50;font-size:14px;font-weight:500;line-height:20px;text-decoration:none}.profile-page .back-search svg{display:block;flex-shrink:0}.profile-page .profile-action:hover{background:#eaf2ed;border-color:#aec8bb;color:#164f3d}.profile-page .profile-action:focus-visible{outline:2px solid #14634f;outline-offset:3px}
+
+.profile-page .back-search{margin-bottom:20px}.profile-page .detail-note a{color:#315f50;text-decoration:underline;text-underline-offset:3px}
