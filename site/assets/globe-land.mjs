@@ -20,7 +20,10 @@ export function buildLandCells(points){
     }
     return false;
   };
-  const columns=180,dx=TAU/columns,side=dx/Math.sqrt(3),dy=side*1.5;
+  // More columns = smaller connected hexagons (240 is 25% smaller than 180).
+  const columns=240,dx=TAU/columns,side=dx/Math.sqrt(3),dy=side*1.5;
+  // Inset each hexagon by 14% to leave a small gap; 1 restores touching cells.
+  const cellScale=.86;
   const cells=[],vertices=new Map();
   // Integer lattice coordinates guarantee that neighbours reuse the same
   // vertices, including across the longitude seam. Only polar cells deform.
@@ -34,7 +37,13 @@ export function buildLandCells(points){
     const u=col*2+(row%2),v=row*3;
     const center=surface(u*dx/2-Math.PI,v*side/2-Math.PI/2);
     if(!isLand(center))continue;
-    cells.push({center,vertices:[[1,1],[0,2],[-1,1],[-1,-1],[0,-2],[1,-1]].map(([du,dv])=>vertex(u+du,v+dv))});
+    const corners=[[1,1],[0,2],[-1,1],[-1,-1],[0,-2],[1,-1]].map(([du,dv])=>vertex(u+du,v+dv));
+    const insetVertices=corners.map(corner=>{
+      const p=corner.map((value,i)=>center[i]+(value-center[i])*cellScale);
+      const length=Math.hypot(...p);
+      return p.map(value=>value/length);
+    });
+    cells.push({center,vertices:corners,insetVertices});
   }
   return cells;
 }

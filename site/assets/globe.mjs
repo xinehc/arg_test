@@ -1,5 +1,5 @@
 import {drawLocationMarkers,horizonOpacity} from './globe-renderer.mjs?v=hex-3';
-import {buildLandCells,projectLandCell} from './globe-land.mjs';
+import {buildLandCells,projectLandCell} from './globe-land.mjs?v=gap-2';
 import {parseLocations} from './globe-locations.mjs';
 // Adapted from ContinentHexbins / Scene in the user-supplied globe-main/index.tsx.
 // The supplied Fibonacci land mask classifies a connected spherical honeycomb.
@@ -38,12 +38,10 @@ async function start(){
     // are painted, allowing the page background to show through the globe.
     const cx=size/2,cy=size/2,r=size*.46;
     const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tilt),st=Math.sin(tilt),cr=Math.cos(roll),sr=Math.sin(roll);
-    // Connected geographic cells share their actual surface vertices, so they
-    // stay joined as the sphere rotates and foreshortens toward the horizon.
-    ctx.lineWidth=Math.max(.5,size*.00065);
+    // Slightly inset geographic cells retain small gaps during rotation.
     const rotation={ca,sa,ct,st,cr,sr};
     for(const cell of cells){
-      const polygon=projectLandCell(cell.vertices,rotation);
+      const polygon=projectLandCell(cell.insetVertices,rotation);
       if(polygon.length<3)continue;
       const [x,y,z]=cell.center;
       const depth=y*st+(z*ca-x*sa)*ct;
@@ -53,8 +51,8 @@ async function start(){
       });
       ctx.closePath();
       const eased=horizonOpacity(depth-.015,.14);
+      // Filled hexagon shapes with no outlines.
       ctx.fillStyle='rgb(106,133,121)';ctx.globalAlpha=(.10+depth*.12)*eased;ctx.fill();
-      ctx.strokeStyle='rgb(86,117,103)';ctx.globalAlpha=(.40+depth*.30)*eased;ctx.stroke();
     }
     ctx.globalAlpha=1;
     drawLocationMarkers(ctx,markers,pointColor,{ca,sa,ct,st,cr,sr,cx,cy,r,size,zoom});
