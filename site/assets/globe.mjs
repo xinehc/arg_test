@@ -1,4 +1,4 @@
-import {clampZoom,pointRadius} from './chart-utils.mjs';
+import {pointRadius} from './chart-utils.mjs';
 // Adapted from ContinentHexbins / Scene in the user-supplied globe-main/index.tsx.
 // Same Fibonacci-sphere continent sampling; a lightweight Canvas renderer replaces
 // the React/Three scene. Coordinates are geographical surface points, not samples.
@@ -11,7 +11,7 @@ async function start(){
   const response=await fetch(new URL('./globe/land-points.json',import.meta.url));
   if(!response.ok)throw new Error('Globe unavailable');
   const points=await response.json();
-  const colors={'host-associated':'#e33e39',environmental:'#2879ed',engineered:'#f3c624'};
+  const colors={'host-associated':'#a05f5a',environmental:'#3e7f8f',engineered:'#b58c45'};
   let markers=[];
   try {
     const locationResponse=await fetch(new URL('./globe/locations.tsv',import.meta.url));
@@ -33,38 +33,102 @@ async function start(){
     document.querySelector('#globe-legend').hidden=false;
   } catch {caption.textContent='Location layer unavailable';}
 
-  let angle=0.2,tilt=0.12,size=0,frame=0,last=0,visible=true,paused=reduced.matches,drag=null,zoom=1;
+  // Give every page load a genuinely different 3D motion. In addition to yaw,
+  // pitch and roll are randomized and then drift independently, so the automatic path
+  // can arc diagonally instead of always sweeping horizontally around the equator.
+  let angle=Math.random()*Math.PI*2,tilt=(Math.random()*.9)-.45,roll=(Math.random()*Math.PI*2)-Math.PI;
+  let tiltVelocity=(Math.random()<.5?-1:1)*(.000006+Math.random()*.000012);
+  const yawVelocity=(Math.random()<.5?-1:1)*(.000028+Math.random()*.000036);
+  const rollVelocity=(Math.random()<.5?-1:1)*(.000006+Math.random()*.000014);
+  const yawPhase=Math.random()*Math.PI*2,tiltPhase=Math.random()*Math.PI*2,rollPhase=Math.random()*Math.PI*2;
+  let motionTime=0;
+  let size=0,frame=0,last=0,visible=true,paused=reduced.matches,drag=null,zoom=1;
+  // Start smaller, then allow a more useful zoom range. The globe canvas is deliberately
+  // wider than its layout column on desktop (see home.css), so the sphere can grow like a
+  // background visual without ever touching the canvas edge. maxRadiusRatio also leaves
+  // enough internal room for the rim stroke and the largest location markers.
+  const baseRadiusRatio=.34,maxRadiusRatio=.455,maxZoom=maxRadiusRatio/baseRadiusRatio;
   const setButton=()=>{toggle.textContent=paused?'Resume rotation':'Pause rotation';toggle.setAttribute('aria-pressed',String(paused));};
   function draw(){
     if(!size)return;
     const dpr=Math.min(devicePixelRatio||1,1.5);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,size,size);
-    const cx=size/2,cy=size/2,r=size*.405*zoom;
-    const halo=ctx.createRadialGradient(cx,cy,r*.8,cx,cy,r*1.2);halo.addColorStop(0,'rgba(47,137,105,0.12)');halo.addColorStop(1,'rgba(47,137,105,0)');
+    const cx=size/2,cy=size/2,r=size*baseRadiusRatio*zoom;
+    const halo=ctx.createRadialGradient(cx,cy,r*.72,cx,cy,r*1.18);halo.addColorStop(0,'rgba(47,137,105,0.10)');halo.addColorStop(.72,'rgba(47,137,105,0.045)');halo.addColorStop(1,'rgba(47,137,105,0)');
     ctx.fillStyle=halo;ctx.fillRect(0,0,size,size);
-    const sphere=ctx.createRadialGradient(cx-r*.45,cy-r*.5,r*.1,cx+r*.1,cy+r*.15,r*1.2);sphere.addColorStop(0,'#f8fcfa');sphere.addColorStop(.6,'#e2efe8');sphere.addColorStop(1,'#b7d5c6');
-    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=sphere;ctx.fill();ctx.strokeStyle='#a9cdbb';ctx.lineWidth=.7;ctx.stroke();
-    const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tilt),st=Math.sin(tilt);
+    // Keep the globe surface fully opaque. There is no stroked rim, but unlike the
+    // previous soft-edge treatment the sphere itself never fades to transparency.
+    const sphere=ctx.createRadialGradient(cx-r*.34,cy-r*.38,r*.08,cx,cy,r);
+    sphere.addColorStop(0,'rgb(248,252,250)');
+    sphere.addColorStop(.58,'rgb(226,239,232)');
+    sphere.addColorStop(.88,'rgb(198,222,210)');
+    sphere.addColorStop(1,'rgb(190,216,203)');
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=sphere;ctx.fill();
+    const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tilt),st=Math.sin(tilt),cr=Math.cos(roll),sr=Math.sin(roll);
+    // Draw the land mask as visible hexagonal cells rather than dot-like points.
+    // Four depth bands keep the globe shaded while batching fill/stroke operations.
+    const landPaths=Array.from({length:8},()=>new Path2D());
     for(const [x,y,z] of points){
       const rx=x*ca+z*sa,rz=z*ca-x*sa,ry=y*ct-rz*st,depth=y*st+rz*ct;if(depth<0)continue;
-      const px=cx+rx*r,py=cy-ry*r,dot=Math.max(.55,size*.0021)*(0.65+depth*.35);
-      ctx.fillStyle=`rgba(23,103,77,${(.26+depth*.65).toFixed(2)})`;
-      ctx.beginPath();for(let j=0;j<6;j++){const a=j*Math.PI/3;const hx=px+Math.cos(a)*dot,hy=py+Math.sin(a)*dot;j?ctx.lineTo(hx,hy):ctx.moveTo(hx,hy);}ctx.closePath();ctx.fill();
+      const ux=rx*cr-ry*sr,uy=rx*sr+ry*cr;
+      const px=cx+ux*r,py=cy-uy*r,hex=Math.max(1.15,size*.0032)*(0.82+depth*.18);
+      const path=landPaths[Math.min(7,Math.floor(depth*8))];
+      for(let j=0;j<6;j++){
+        const a=Math.PI/6+j*Math.PI/3,hx=px+Math.cos(a)*hex,hy=py+Math.sin(a)*hex;
+        j?path.lineTo(hx,hy):path.moveTo(hx,hy);
+      }
+      path.closePath();
     }
-    // Batch the real locations into three canvas paths to keep rotation smooth.
-    const paths=Object.fromEntries(Object.keys(colors).map(category=>[category,new Path2D()]));
+    ctx.lineWidth=Math.max(.35,size*.00065);
+    landPaths.forEach((path,index)=>{
+      const depth=(index+.5)/8;
+      const horizon=Math.min(1,Math.max(0,(depth-.015)/.14));
+      const eased=horizon*horizon*(3-2*horizon);
+      ctx.fillStyle=`rgba(35,128,94,${((.10+depth*.17)*eased).toFixed(3)})`;
+      ctx.strokeStyle=`rgba(20,91,68,${((.12+depth*.18)*eased).toFixed(3)})`;
+      ctx.fill(path);ctx.stroke(path);
+    });
+    // Batch real locations by category and horizon depth. Very fine depth bands make
+    // horizon opacity effectively continuous while retaining efficient batched Canvas fills.
+    const markerBands=160;
+    const paths=Object.fromEntries(Object.keys(colors).map(category=>[category,Array.from({length:markerBands},()=>new Path2D())]));
     for(const m of markers){
       if(!m.weight)continue;
       const rx=m.x*ca+m.z*sa,rz=m.z*ca-m.x*sa,ry=m.y*ct-rz*st,depth=m.y*st+rz*ct;
-      if(depth<0.02)continue;
-      const px=cx+rx*r,py=cy-ry*r,dot=pointRadius(m.weight,size,zoom);
-      paths[m.category].moveTo(px+dot,py);paths[m.category].arc(px,py,dot,0,Math.PI*2);
+      if(depth<0)continue;
+      const ux=rx*cr-ry*sr,uy=rx*sr+ry*cr;
+      const px=cx+ux*r,py=cy-uy*r,dot=pointRadius(m.weight,size,zoom);
+      const band=Math.min(markerBands-1,Math.floor(depth*markerBands));
+      paths[m.category][band].moveTo(px+dot,py);paths[m.category][band].arc(px,py,dot,0,Math.PI*2);
     }
-    ctx.globalAlpha=.85;
-    for(const category of Object.keys(colors)){ctx.fillStyle=colors[category];ctx.fill(paths[category]);}
-
+    for(const category of Object.keys(colors)){
+      ctx.fillStyle=colors[category];
+      paths[category].forEach((path,index)=>{
+        const depth=(index+.5)/markerBands;
+        // Smoothstep across a broad horizon zone. With 160 bands the opacity increment
+        // between adjacent depths is too small to read as a flash or bucket change.
+        const horizon=Math.min(1,Math.max(0,depth/.24));
+        const eased=horizon*horizon*(3-2*horizon);
+        ctx.globalAlpha=.60*eased;
+        ctx.fill(path);
+      });
+    }
     ctx.globalAlpha=1;
   }
-  function animate(now){frame=0;if(!visible||document.hidden||paused||drag)return;if(now-last>=32){angle+=Math.min(now-last,60)*.00005;last=now;draw();}frame=requestAnimationFrame(animate);}
+  function animate(now){
+    frame=0;if(!visible||document.hidden||paused||drag)return;
+    if(now-last>=16){
+      const dt=Math.min(now-last,60);motionTime+=dt;
+      // Slowly modulate each axis so even one page load does not settle into a fixed orbit.
+      angle+=dt*yawVelocity*(.82+.18*Math.sin(motionTime*.00035+yawPhase));
+      tilt+=dt*(tiltVelocity+.000006*Math.sin(motionTime*.00022+tiltPhase));
+      roll+=dt*rollVelocity*(.72+.28*Math.sin(motionTime*.00027+rollPhase));
+      // Softly bounce the pitch before the poles; this keeps motion varied without flipping abruptly.
+      if(tilt>.72){tilt=.72;tiltVelocity=-Math.abs(tiltVelocity);}
+      else if(tilt<-.72){tilt=-.72;tiltVelocity=Math.abs(tiltVelocity);}
+      last=now;draw();
+    }
+    frame=requestAnimationFrame(animate);
+  }
   function schedule(){if(!frame&&visible&&!document.hidden&&!paused&&!drag){last=performance.now();frame=requestAnimationFrame(animate);}}
   function refresh(){cancelAnimationFrame(frame);frame=0;draw();schedule();}
   new ResizeObserver(()=>{size=canvas.clientWidth;const dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(size*dpr);canvas.height=Math.round(size*dpr);refresh();}).observe(canvas);
@@ -72,16 +136,17 @@ async function start(){
   document.addEventListener('visibilitychange',refresh);
   toggle.hidden=false;setButton();toggle.addEventListener('click',()=>{paused=!paused;setButton();refresh();});
   reduced.addEventListener('change',()=>{paused=reduced.matches;setButton();refresh();});
-  const zoomIn=document.querySelector('#globe-zoom-in'),zoomOut=document.querySelector('#globe-zoom-out'),zoomReset=document.querySelector('#globe-zoom-reset');
-  function setZoom(value){zoom=clampZoom(value);zoomIn.disabled=zoom>=3;zoomOut.disabled=zoom<=1;zoomReset.textContent=zoom.toFixed(1)+'×';refresh();}
-  zoomIn.onclick=()=>setZoom(zoom+.25);zoomOut.onclick=()=>setZoom(zoom-.25);zoomReset.onclick=()=>setZoom(1);
+  // The drawing itself never reaches the canvas edge. On desktop the oversized canvas
+  // can extend beyond the nominal globe column as a background layer, so this feels less
+  // constrained while still guaranteeing that the complete rim is rendered.
+  function setZoom(value){zoom=Math.max(1,Math.min(maxZoom,value));refresh();}
   canvas.addEventListener('wheel',e=>{e.preventDefault();setZoom(zoom*Math.exp(-Math.max(-100,Math.min(100,e.deltaY))*.002));},{passive:false});
   const pointers=new Map();let pinchDistance=null;
   const distance=()=>{const [a,b]=[...pointers.values()];return Math.hypot(a.x-b.x,a.y-b.y);};
   canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY};if(pointers.size===2)pinchDistance=distance();refresh();});
-  canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size>=2){const next=distance();if(pinchDistance>0)setZoom(zoom*next/pinchDistance);pinchDistance=next;return;}if(!drag)return;angle+=(e.clientX-drag.x)*.006/zoom;tilt=Math.max(-.65,Math.min(.65,tilt+(e.clientY-drag.y)*.003/zoom));drag={x:e.clientX,y:e.clientY};draw();});
+  canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size>=2){const next=distance();if(pinchDistance>0)setZoom(zoom*next/pinchDistance);pinchDistance=next;return;}if(!drag)return;angle+=(e.clientX-drag.x)*.006/zoom;tilt=Math.max(-.72,Math.min(.72,tilt+(e.clientY-drag.y)*.003/zoom));drag={x:e.clientX,y:e.clientY};draw();});
   const release=e=>{pointers.delete(e.pointerId);pinchDistance=null;drag=pointers.size?[...pointers.values()][0]:null;schedule();};canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);canvas.addEventListener('lostpointercapture',release);
-  document.querySelector('#globe-zoom').hidden=false;setZoom(1);
+  setZoom(1);
   window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);frame=0;});window.addEventListener('pageshow',schedule);
 }
 start().catch(()=>{canvas.hidden=true;caption.textContent='Globe unavailable. Accession search is still available.';});
