@@ -4,26 +4,24 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ARG Atlas | Accession search</title>
   <meta name="description" content="Find an accession and explore its antibiotic resistance gene abundance by type and subtype.">
-  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css?v=logo-footer-3">
-  <script type="module" src="./assets/search.mjs?v=home-3"></script><script type="module" src="./assets/globe.mjs?v=filled-2"></script>
+  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css?v=copy-4">
+  <script type="module" src="./assets/search.mjs?v=copy-4"></script><script type="module" src="./assets/globe.mjs?v=forest-2"></script>
 </head>
 <body class="atlas-home">
   <div class="globe-background" aria-hidden="true"><canvas id="globe"></canvas></div>
-  <header><a class="brand" href="./index.html"><img src="./favicon.svg" width="37" height="37" alt="">ARG<span>atlas</span></a><span class="header-sub">Antibiotic resistance gene explorer</span><a class="template-link" href="./profile-template.txt" download>Data template <span aria-hidden="true">↗</span></a></header>
   <main class="home-main">
     <section class="home-hero" aria-labelledby="home-title">
       <div class="home-content">
         <div class="eyebrow">THE RESISTOME, BY ACCESSION</div>
-        <h1 id="home-title">A world of<br>resistance genes<span>.</span></h1>
-        <p class="home-intro">Explore antibiotic resistance gene abundance.<br class="desktop-break"> One sample. Every type and subtype.</p>
+        <h1 id="home-title">A map of antibiotic resistance genes<span>.</span></h1>
+        <p class="home-intro">Explore ARG abundance across 1,046,428 samples, profiled by Lynx.</p>
         <div class="home-search">
           <form id="search-form" class="accession-form">
             <label for="accession">Find a sample</label>
-            <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="accession" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="100" placeholder="Enter accession, e.g. DRR000713" aria-describedby="lookup-help" required><button id="submit" class="primary-button" type="submit">Open profile →</button></div>
+            <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="accession" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="100" placeholder="Enter accession, e.g. DRR000713" required><button id="submit" class="primary-button" type="submit">Open profile →</button></div>
           </form>
-          <div id="lookup-help" class="lookup-help">Exact accession match · no browsing required</div>
           <p id="error" class="accession-error" role="alert" hidden></p>
-          <div class="search-hint" id="example-wrap" hidden>Try an example <button id="example" type="button"></button></div>
+        <div class="search-hint"><span id="example-wrap" hidden>Try an example <button id="example" type="button"></button>, or </span><span>download the full profiles from <a id="full-profiles" href="https://zenodo.org/records/22330481">Zenodo</a>.</span></div>
         </div>
       </div>
     </section>
