@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Subtype explorer | ARG Atlas</title>
+  <meta name="description" content="Explore matched accession counts and the top samples for a resistance type and subtype.">
+  <link rel="icon" href="./favicon.svg">
+  <link rel="stylesheet" href="./assets/style.css">
+  <link rel="stylesheet" href="./assets/subtype.css?v=biome-filter-1">
+  <script type="module" src="./assets/subtype-page.mjs?v=biome-filter-1"></script>
+</head>
+<body>
+  <main class="profile-page subtype-page">
+    <a class="back-search profile-action" href="./index.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m5-4-5 4 5 4"/></svg><span>Back to search</span></a>
+    <div id="subtype-state" class="panel empty" role="status">Loading subtype…</div>
+    <article id="subtype-detail" hidden>
+      <section class="subtype-summary panel" aria-labelledby="subtype-title">
+        <div class="subtype-identity"><span class="eyebrow">RESISTANCE SUBTYPE</span><h2 id="subtype-title"></h2><p>Type <strong id="subtype-type"></strong></p></div>
+        <dl class="subtype-metrics">
+          <div><dt>Matched accessions</dt><dd id="matched-count"></dd><small>Across the full collection</small></div>
+          <div><dt>Top samples supplied</dt><dd id="sample-count"></dd><small>Ranked by abundance</small></div>
+          <div><dt>Samples with coordinates</dt><dd id="coordinate-count"></dd><small>Within the supplied top samples</small></div>
+        </dl>
+      </section>
+      <section class="subtype-map-panel panel" aria-labelledby="map-heading">
+        <div class="subtype-section-heading"><div><h2 id="map-heading">Where the top samples were collected</h2><p id="map-description"></p></div><span class="map-key"><i></i>Sample locations</span></div>
+        <div class="subtype-map" id="sample-map">
+          <canvas id="map-land" width="1000" height="500" aria-hidden="true"></canvas>
+          <svg id="map-points" viewBox="0 0 1000 500" role="group" aria-label="Locations of the supplied top samples"></svg>
+        </div>
+        <p id="map-status" class="map-status" role="status"></p>
+        <p class="subtype-map-note">This map represents only the supplied top samples, not all matched accessions. Records without valid coordinates remain in the table.</p>
+      </section>
+      <section class="subtype-table-panel panel" aria-labelledby="samples-heading">
+        <div class="subtype-section-heading"><div><h2 id="samples-heading">Top samples</h2><p id="samples-description"></p></div><button id="download-samples" class="profile-action">Download top samples TSV ↓</button></div>
+        <div class="sample-controls">
+          <label>Sort by<select id="sample-sort"><option value="abundance">Abundance: high to low</option><option value="copy">Copy: high to low</option><option value="accession">Accession: A–Z</option></select></label>
+          <button id="biome-filter" class="biome-filter-button" type="button" aria-pressed="false" title="Show only samples whose biome does not start with na:">Exclude na: biomes</button>
+          <p id="sample-filter-status" role="status"></p>
+        </div>
+        <div class="sample-table-scroll" tabindex="0" role="region" aria-label="Top sample metadata, scroll horizontally for all columns">
+          <table class="sample-table"><caption class="sr-only">Metadata for the supplied top samples; abundance rank is retained when sorting or filtering.</caption><thead><tr><th scope="col">Rank</th><th scope="col">Accession</th><th scope="col">Abundance</th><th scope="col">Copy</th><th scope="col">Scientific name</th><th scope="col">Biome</th><th scope="col">Location</th><th scope="col">Collection date</th><th scope="col">Latitude / longitude</th></tr></thead><tbody id="sample-rows"></tbody></table>
+        </div>
+        <p id="sample-empty" class="subtype-empty" hidden>No supplied samples match this filter.</p>
+        <p class="sample-footnote">Metadata values are shown as supplied. “na” denotes unavailable metadata; missing abundance is shown as Not available; TSV downloads retain the original numeric precision.</p>
+      </section>
+    </article>
+    <noscript>Enable JavaScript to search subtypes and view their sample metadata.</noscript>
+  </main>
+</body>
+</html>

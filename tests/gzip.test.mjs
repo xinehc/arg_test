@@ -24,5 +24,5 @@ test('header optional; new metadata fields preserved; malformed records rejected
 });
 test('loader requests exact gz URL and returns metadata from the same response',async()=>{
  globalThis.document={baseURI:'https://user.github.io/repo/'};globalThis.sessionStorage={getItem:()=>null,setItem:()=>{}};
- const old=globalThis.fetch;let calls=0;try{globalThis.fetch=async url=>{calls++;assert.equal(url,'https://bucket.example/DRR000713.txt.gz');return new Response(gz);};const p=await loadProfile({profileBaseUrl:'https://bucket.example'},'drr000713');assert.equal(p.metadata.length,17);assert.equal(calls,1);}finally{globalThis.fetch=old;}
+ const old=globalThis.fetch;let calls=0;try{globalThis.fetch=async url=>{calls++;assert.equal(url,'https://user.github.io/repo/data/profiles/713.txt.gz');return new Response(gzipSync(txt.replace('[metadata]','[metadata]\naccession\tDRR000713')));};const p=await loadProfile({profileBaseUrl:'./data/profiles'},'drr000713');assert.equal(p.metadata.length,18);assert.equal(calls,1);}finally{globalThis.fetch=old;}
 });

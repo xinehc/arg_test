@@ -1,4 +1,4 @@
-import {pointRadius} from './chart-utils.mjs';
+import {pointRadius} from './chart-utils.mjs?v=local-batches-2';
 
 export function horizonOpacity(depth,width){
   const t=Math.max(0,Math.min(1,depth/width));

@@ -1,70 +1,91 @@
-# ARG Atlas: combined TXT.GZ profiles
+# ARG Atlas
 
-A static GitHub Pages website with exact accession lookup, a globe with real sample locations, metadata, and ARG type/subtype distributions. No backend server or separate metadata index is needed.
+A static website with accession search, resistance subtype search, sample metadata, and ARG distributions. All runtime data is served from `site/data/` on the same origin as the website. No storage account, credentials, backend, or external map service is required.
 
-## Deploy an existing repository
+## Local preview
 
-1. Copy this package's contents into your repository, including `.github/workflows/pages.yml` and `site/`. Use the new workflow to replace the old metadata-build workflow.
-2. In GitHub Settings → Pages, select GitHub Actions as the source. Commit to `main` to deploy.
-3. Upload `DRR000713.txt.gz` (and your other accession files) into R2. An unchanged `.txt` object is not the file this version requests.
-4. Keep your bucket's public read URL and CORS policy configured. This package already uses `https://pub-459b51c080494f7c9867269d16d90670.r2.dev`.
+```bash
+python3 -m http.server 8000 --directory site
+```
 
-The optional `scripts/deploy_github.sh OWNER/REPO --public` creates a new repository using the GitHub CLI. For an existing repository, use your normal commit/push workflow.
+Open `http://localhost:8000`. Use HTTP rather than opening HTML files directly. The default accession example is `DRR000713`; the subtype example is `beta-lactam|blaTEM`.
 
-## File format: exactly matches the attached example
+## Accession batches
 
-Object name: `DRR000713.txt.gz`. The decompressed UTF-8 text contains:
+`site/data/profiles/` contains 1,000 gzip batches named `000.txt.gz` through `999.txt.gz`. The last **three digits** of the complete accession select the batch: `DRR000713` uses `713.txt.gz`. Lookup then matches the complete, case-normalized accession in that batch; it never uses prefix or suffix matching to choose a profile.
+
+Each profile starts with `[metadata]`, contains one accession field, and ends before the next `[metadata]` section:
 
 ```text
 [metadata]
+accession	DRR000713
 project	PRJDA53873
 scientific_name	food metagenome
-spot_length	80.0
-genome_size	3924.0517
-sample	SAMD00008644
-platform	ILLUMINA
-published	2012-02-20 22:01:22
+...
 
-[abundance]
+[data]
 subtype	copy	abundance
 aminoglycoside|aph(6)-I	0.086	0.26922324398356484
 ```
 
-The example above is abbreviated. `examples/DRR000713.txt.gz` is the original complete upload, unchanged, and `examples/DRR000713.txt` is its decompressed content. All 17 metadata fields appear in source order. No `field/value` header or metadata accession field is required; an optional `field<TAB>value` header is supported. New metadata keys are automatically displayed. Metadata values, including spaces, `na`, and decimal precision, remain strings. Separate fields and values with literal tabs, not spaces. Embedded tabs/newlines inside values are not supported.
+Fields use literal tabs. The legacy `[abundance]` section name also parses. New metadata fields and original precision are retained; metadata is rendered as text. A header-only `[data]` section represents no reported resistance subtypes. An abundance value of `n/a` is unavailable, not zero: its row, affected type totals, overall abundance, and percentages display “Not available” as appropriate. Copy values and metadata remain accessible. Downloads contain only the selected profile's original text.
 
-Abundance accepts the attached `subtype / copy / abundance` header and splits each `type|subtype` at the first pipe. It also accepts `type / subtype / abundance` or `type / subtype / copy / abundance`. Duplicate metadata fields, duplicate ARG pairs, missing sections, malformed numbers, and mismatched metadata accessions are rejected. Plain legacy abundance tables still parse, but the configured object suffix is `.txt.gz`.
-
-## Loading and decompression
-
-Search `drr000713` to request exactly `DRR000713.txt.gz`. HTTP 404 means accession not found. The browser decompresses gzip locally using DecompressionStream. It checks the gzip magic bytes before decompressing, so responses already decoded by HTTP Content-Encoding work too. Use a current Chrome, Edge, Firefox, or Safari; unsupported browsers get an explicit message.
-
-Both received bytes and decompressed text have a 5 MB limit. Abundance tables support up to 10,000 rows. Only the last successfully loaded text is cached in sessionStorage for 60 seconds to reuse it when navigating from search to profile. No separate metadata request is made. Metadata is displayed as text, never interpreted as HTML. Download TXT includes both original sections.
-
-Keep gzip objects as `Content-Type: application/gzip` without `Content-Encoding`; the included uploader does this. Existing objects correctly served with `Content-Encoding: gzip` also work because the loader detects the resulting bytes.
-
-## Configuration
-
-`site/config.json` specifies `profileBaseUrl`, `filePrefix`, and `profileExtension` (default `.txt.gz`). To use plain objects explicitly, set `profileExtension` to `.txt`. Files should have uppercase accession names with lowercase extensions. Do not include bucket credentials in this file or in website JavaScript.
-
-## Upload profiles (optional)
-
-Install dependencies with `python -m pip install -r requirements.txt`. Set `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET` in your local shell, following `.env.example`.
+The browser decompresses the selected batch with `DecompressionStream`. Batches must contain a **single gzip stream**; concatenating already-compressed profile files produces multiple streams that this decoder rejects. To losslessly repack a newly supplied batch directory:
 
 ```bash
-python scripts/upload_profiles.py --input /path/to/gzip-profiles --validate-only
-python scripts/upload_profiles.py --input /path/to/gzip-profiles
+python3 scripts/prepare_profiles.py
 ```
 
-Use a folder containing only one file per accession. The uploader supports `.txt.gz` and `.txt`, validates decoded content before upload, preserves the original bytes and suffix, and resumes using a local SQLite checkpoint. It does not list or delete bucket objects. `--overwrite` explicitly allows replacement. Do not point it at `examples/`, which includes both formats for the same accession.
+This replaces each gzip file only after confirming that the repacked file decompresses to exactly the same bytes. It also checks duplicate accessions and filename suffixes. The migrated batches have already been repacked.
 
-## Preview locally
+Received and expanded batches have a 32 MB limit; an individual selected profile has a 5 MB limit and up to 10,000 rows. Only the last selected profile is cached in sessionStorage for 60 seconds, keyed by both its batch URL and complete accession. Entire batches are not stored in sessionStorage. Responses already decoded by HTTP Content-Encoding are supported by inspecting the gzip magic bytes.
 
-Serve the `site/` folder over HTTP with `python -m http.server 8000 --directory site`. To use the included local sample instead of R2, temporarily set `profileBaseUrl` to `./data` in `site/config.json`. Restore the R2 URL before deploying. Do not open index.html directly as a file URL.
+`site/config.json` uses `profileBaseUrl: "./data/profiles"` and `batchSuffixDigits: 3`. The loader requires same-origin data and supports GitHub Pages repository subpaths.
+
+## Subtype files
+
+`site/data/subtypes/` contains the supplied `.txt.gz` files with `[metadata]` and `[data]` sections:
+
+```text
+[metadata]
+type	biocide
+subtype	qacA/B
+matched	1234
+shown	1000
+
+[data]
+subtype	copy	abundance	accession	scientific_name	biome	geo_loc_name	collection_date	lat_lon
+```
+
+The counts above illustrate the format. The actual catalog contains 1,123 pairs and 998,644 sample rows, with up to 1,000 supplied samples per pair. Full matched counts are separate from supplied sample counts. The table and map cover only supplied samples; missing coordinates never remove rows from the table. Missing subtype abundance (`nan`) displays “Not available”, sorts after measured values, and is preserved in downloads.
+
+The complete `(type, subtype)` pair is the identity. Names such as `bacitracin|bcrB` and `biocide|bcrB` remain separate. **Metadata preserves the original subtype spelling, including `/`.** The catalog records each file's actual basename (for example `biocide|qacA_B.txt.gz`) rather than attempting to reverse underscores into slashes. Requests URL-encode that basename. The reader verifies metadata and each data row against the selected pair.
+
+After adding or replacing subtype files, rebuild the small search catalog:
+
+```bash
+python3 scripts/build_subtypes.py
+```
+
+This validates metadata, counts, row identities, unique sample accessions, and numeric values before writing `site/data/subtypes/index.json`. It does not modify or duplicate the source files. Search loads only the catalog; opening a subtype loads only its associated gzip file. TSV downloads retain the original metadata and numeric precision. Accession links use the local profile batches.
 
 ## Verification
 
-`node --test tests/*.test.mjs` exercises the uploaded gzip, all metadata fields, ARG parsing, exact lookup, already-decoded responses, corrupted gzip, expansion limits and invalid records. `python tests/test_upload.py` checks uploader object naming, content type, duplicate detection and resumable uploads. Live R2 access and browser visual QA have not been performed for this package.
+No third-party packages are needed for the scripts or tests. Use a current Node.js with built-in fetch and DecompressionStream, and Python 3.9 or later.
 
-The globe reads `site/assets/globe/locations.tsv` with columns `lat`, `lon`, `size`. Marker area uses log2(1 + size), with visible minimum and maximum radii. The globe is a large, transparent decorative background with random automatic rotation and no zoom or drag controls. It respects reduced-motion preferences. The supplied 12,773 points all have size 1. Replace the TSV to update the map; coordinates must be valid decimal degrees and sizes finite and nonnegative. All sample points use muted teal (`#427a68`); no biome column is needed. The website and public R2 files are publicly readable when deployed through GitHub Pages.
+```bash
+node --test tests/*.test.mjs
+python3 -m unittest discover -s tests -p 'test_*.py'
+node scripts/validate_profiles.mjs
+python3 scripts/check_site_size.py
+```
 
-The type filter supports multiple selections (union of selected types); clear selection returns all subtypes. Percentages use the whole profile total. Abundance displays up to three decimal places, with values below 0.0005 shown as <0.001; downloads preserve source precision. Total copy sums all copy values, or reports Not available when any row lacks a copy value.
+The full profile audit parses every supplied profile, checks batch assignment, duplicate accessions, size limits, and data validity. Unit tests cover exact accession matching, cache isolation, gzip bounds, empty/unavailable data, subtype name collisions, slash-containing names, coordinates, and every indexed subtype file.
+
+## Deployment
+
+Publish the contents of `site/` using any static host with sufficient capacity. The existing GitHub Pages workflow rebuilds the subtype index, checks the site's size, and uploads that directory. For an existing GitHub repository, enable Pages → GitHub Actions and push your changes to `main`. `scripts/deploy_github.sh OWNER/REPO --public` is an optional helper for creating a new repository.
+
+**The current dataset is too large for GitHub Pages' documented 1 GB published-site limit.** Profile batches alone occupy 1,669,809,813 bytes after lossless repacking; subtype data and site assets add to that. The workflow's size check intentionally fails before upload. Further data reduction or a static host with a larger capacity is needed before publishing this complete dataset. Local preview and all search functions work independently of that hosting limitation.
+
+The globe uses the bundled `site/assets/globe/locations.tsv` and land mask, with a transparent decorative canvas, random rotation, no drag/zoom controls, and reduced-motion support. The existing type filter, abundance formatting, and profile display remain in place. The website and its data are publicly readable when published.

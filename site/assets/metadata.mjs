@@ -1,8 +1,8 @@
-import {el} from './common.mjs';
+import {el} from './common.mjs?v=local-batches-2';
 export function showMetadata(profile){
  const panel=document.getElementById('metadata-panel'),status=document.getElementById('metadata-status');panel.hidden=false;
  const list=el('dl','metadata-grid');
- const hiddenFields=new Set(['genome','univec']);
+ const hiddenFields=new Set(['accession','genome','univec']);
  const metadata=profile.metadata.filter(([name])=>!hiddenFields.has(name.trim().toLowerCase()));
  for(const [name,value] of metadata){const item=el('div');item.append(el('dt','',name),el('dd','',value===''?'—':value));list.append(item);}
  document.getElementById('metadata-fields').replaceChildren(list);

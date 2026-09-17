@@ -2,26 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ARG Atlas | Accession search</title>
-  <meta name="description" content="Find an accession and explore its antibiotic resistance gene abundance by type and subtype.">
-  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css?v=copy-4">
-  <script type="module" src="./assets/search.mjs?v=copy-4"></script><script type="module" src="./assets/globe.mjs?v=forest-2"></script>
+  <title>ARG Atlas | Accession and subtype search</title>
+  <meta name="description" content="Search accessions or resistance subtypes and explore antibiotic resistance gene abundance and sample metadata.">
+  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css?v=search-ui-2">
+  <script type="module" src="./assets/search.mjs?v=search-navigation-1"></script><script type="module" src="./assets/globe.mjs?v=forest-2"></script>
+  <link rel="stylesheet" href="./assets/subtype-search.css?v=search-navigation-1">
+  <script type="module" src="./assets/subtype-search.mjs?v=search-navigation-1"></script>
 </head>
 <body class="atlas-home">
   <div class="globe-background" aria-hidden="true"><canvas id="globe"></canvas></div>
   <main class="home-main">
     <section class="home-hero" aria-labelledby="home-title">
       <div class="home-content">
-        <div class="eyebrow">THE RESISTOME, BY ACCESSION</div>
-        <h1 id="home-title">A map of antibiotic resistance genes<span>.</span></h1>
+        <div class="eyebrow">THE RESISTOME, BY ACCESSION | SUBTYPE</div>
+        <h1 id="home-title">An atlas of antibiotic resistance genes<span>.</span></h1>
         <p class="home-intro">Explore ARG abundance across 1,046,428 samples, profiled by Lynx.</p>
         <div class="home-search">
-          <form id="search-form" class="accession-form">
-            <label for="accession">Find a sample</label>
-            <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="accession" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="100" placeholder="Enter accession, e.g. DRR000713" required><button id="submit" class="primary-button" type="submit">Open profile →</button></div>
-          </form>
-          <p id="error" class="accession-error" role="alert" hidden></p>
-        <div class="search-hint"><span id="example-wrap" hidden>Try an example <button id="example" type="button"></button>, or </span><span>download the full profiles from <a id="full-profiles" href="https://zenodo.org/records/22330481">Zenodo</a>.</span></div>
+          <fieldset class="search-modes">
+            <legend class="sr-only">Search by</legend>
+            <label><input type="radio" name="search-mode" value="accession" checked><span>Accession</span></label>
+            <label><input type="radio" name="search-mode" value="subtype"><span>Subtype</span></label>
+          </fieldset>
+          <div id="accession-search-panel">
+            <form id="search-form" class="accession-form">
+            <label for="accession">Search an accession</label>
+            <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="accession" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="100" placeholder="Enter accession, e.g. DRR000713" required><button id="submit" class="primary-button" type="submit"><span class="search-button-label">Search</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-4 5 4-5 4"/></svg></button></div>
+            </form>
+            <p id="error" class="accession-error" role="alert" hidden></p>
+          </div>
+          <div id="subtype-search-panel" hidden>
+            <form class="accession-form subtype-search-form" data-subtype-search>
+              <label for="subtype-query-home">Search a subtype</label>
+              <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="subtype-query-home" type="search" autocomplete="off" spellcheck="false" placeholder="Enter subtype, e.g. mcr-1" required aria-describedby="subtype-help-home"><button class="primary-button" type="submit"><span class="search-button-label">Search</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-4 5 4-5 4"/></svg></button></div>
+              <p class="sr-only" id="subtype-help-home">Search by subtype or type|subtype. Results distinguish the resistance type.</p>
+              <p class="subtype-search-status" data-search-status role="status"></p>
+              <ul class="subtype-results" data-results aria-label="Matching subtypes"></ul>
+            </form>
+          </div>
+            <div class="search-hint"><span id="example-wrap" hidden>Try an example <button id="example" type="button"></button>, or </span><span id="subtype-example-wrap">Try an example <button id="subtype-example" type="button">mcr-1</button>, or </span><span>download the full profiles from <a id="full-profiles" href="https://zenodo.org/records/22330481">Zenodo</a>.</span></div>
         </div>
       </div>
     </section>
@@ -39,7 +57,7 @@
         <img class="lab-logo lab-logo-university" src="./assets/logos/hku-university.png" width="755" height="849" alt="The University of Hong Kong bilingual logo" loading="lazy" decoding="async">
       </div>
       <div class="lab-wordmark">    Chen, Xi, et al.<br>
-    “A Unified Global Map of Antibiotic Resistance Genes.”<br><em>bioRxiv</em>.<br><br>
+    “A Unified Global Atlas of Antibiotic Resistance Genes.”<br><em>bioRxiv</em>.<br><br>
      Environmental Microbiome<br>Engineering &amp; Biotechnology Lab<br>
     The University of Hong Kong <br>
   </div>

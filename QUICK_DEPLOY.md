@@ -1,7 +1,13 @@
 # Quick deploy
 
-Copy the package contents into your existing repository, including the workflow. Commit to main with GitHub Pages configured to use GitHub Actions. The site now fetches `ACCESSION.txt.gz` from the configured public R2 URL.
+Preview the complete site locally:
 
-Upload the attached `DRR000713.txt.gz` to the bucket root to try it. This release no longer uses `metadata.tsv.gz`, `scripts/build_metadata.py`, or generated `site/metadata/`; these old files can be removed from your existing repository. The included workflow does not run the old metadata builder.
+```bash
+python3 -m http.server 8000 --directory site
+```
 
-The full format, upload steps, local preview instructions, and tests are in README.md.
+All accession and subtype data is now local to `site/data/`. No storage credentials or separate data service are required.
+
+Before publishing, run `python3 scripts/build_subtypes.py` and `python3 scripts/check_site_size.py`. The current complete dataset exceeds GitHub Pages' documented 1 GB site limit, even after lossless gzip repacking. Reduce the published dataset or choose a static host with sufficient capacity.
+
+Once the site fits, configure GitHub Pages to use GitHub Actions and push to `main`; the included workflow publishes `site/`. See README.md for data formats and validation commands.

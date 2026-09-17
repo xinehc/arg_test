@@ -1,12 +1,6 @@
 {
-  "profileBaseUrl": "https://pub-459b51c080494f7c9867269d16d90670.r2.dev",
-  "filePrefix": "",
+  "profileBaseUrl": "./data/profiles",
   "exampleAccession": "DRR000713",
-  "collectionLabel": "ARGmap accession collection",
-  "profileCount": null,
-  "typeCount": null,
-  "subtypeCount": null,
-  "statsNote": "Exact accession lookup",
-  "profileExtension": ".txt.gz",
-  "fullProfilesUrl": "https://zenodo.org/records/22330481"
+  "fullProfilesUrl": "https://zenodo.org/records/22330481",
+  "batchSuffixDigits": 3
 }
