@@ -9,7 +9,7 @@ export function setupSubtypeSearch(form) {
     const current = ++generation, query = input.value.trim();
     results.replaceChildren();
     if (!query) { status.textContent = ''; return; }
-    status.textContent = 'Searching subtypes…';
+    status.textContent = '';
     try {
       const entries = await loadSubtypeCatalog();
       if (current !== generation) return;

@@ -1,5 +1,5 @@
 import {subtypeUrl} from './subtype-data.mjs?v=type-batches-1';
-import {formatAbundance,matchesTypes,totalCopy} from './chart-utils.mjs?v=local-batches-2';
+import {formatAbundance,matchesTypes} from './chart-utils.mjs?v=abundance-precision-4';
 import {showMetadata} from './metadata.mjs?v=hide-accession-1';
 import {normalizeAccession,loadProfile,el} from './common.mjs?v=static-profiles-1';
 const $=id=>document.getElementById(id),palette=['#117663','#318ab5','#8864b4','#ce9250','#ce6387','#597eba','#539c82','#808c52'];
@@ -40,5 +40,24 @@ function table(){const hasCopy=profile.rows.some(r=>r.copy!==undefined),table=el
 function tab(id,focus=false){for(const name of ['distribution','data']){const active=name===id;$(name).hidden=!active;$('tab-'+name).setAttribute('aria-selected',String(active));$('tab-'+name).tabIndex=active?0:-1;}if(focus)$('tab-'+id).focus();}
 for(const id of ['distribution','data']){$('tab-'+id).onclick=()=>tab(id);$('tab-'+id).onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();tab(e.key==='Home'?'distribution':e.key==='End'?'data':id==='data'?'distribution':'data',true);}};}
 $('subtype-query').oninput=e=>{query=e.target.value.toLowerCase();renderRows();};$('clear-type').onclick=()=>{selectedTypes.clear();renderTypes();renderRows();};
-$('download').onclick=()=>{const url=URL.createObjectURL(new Blob([profile.rawText],{type:'text/plain;charset=utf-8'}));const link=el('a');link.href=url;link.download=profile.id+'.txt';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-try{const accession=normalizeAccession(new URLSearchParams(location.search).get('accession')||'');if(!accession)throw Error('Accession not found. Enter a complete accession on the search page.');profile=await loadProfile(accession);document.title=accession+' | Abundance profile';$('profile-title').textContent=accession;const totals=new Map();for(const r of profile.rows)totals.set(r.type,r.abundance===null||totals.get(r.type)===null?null:(totals.get(r.type)||0)+r.abundance);types=[...totals].map(([name,value])=>({name,value})).sort((a,b)=>rankValue(b.value)-rankValue(a.value)||a.name.localeCompare(b.name));rows=[...profile.rows].sort((a,b)=>rankValue(b.abundance)-rankValue(a.abundance)||a.subtype.localeCompare(b.subtype));const genomeEntry=profile.metadata.find(([name])=>name.toLowerCase()==='genome');const genomeValue=genomeEntry?.[1]?.trim()||'Not available';for(const [label,value] of [['Total abundance',display(profile.total)],['Total copy',totalCopy(profile.rows)===null?'Not available':display(totalCopy(profile.rows))],['Genome',genomeValue],['Detected types',profile.typeCount],['Detected subtypes',profile.subtypeCount]]){const item=el('div');item.append(el('dt','',label),el('dd','',value));$('metrics').append(item);}renderTypes();renderRows();table();$('state').hidden=true;$('profile').hidden=false;showMetadata(profile);}catch(e){$('state').replaceChildren(el('h2','',e.message.startsWith('Accession not found')?'Accession not found':'Unable to load profile'),el('p','',e.message));const retry=el('button','outline-button','Retry');retry.onclick=()=>location.reload();$('state').append(retry);}
+$('download').onclick=()=>{
+ const marker=/^[ \t]*\[(?:data|abundance)\][ \t]*\r?\n/im.exec(profile.rawText);
+ const text=(marker?profile.rawText.slice(marker.index+marker[0].length):profile.rawText).trim()+'\n';
+ const url=URL.createObjectURL(new Blob([text],{type:'text/tab-separated-values;charset=utf-8'}));
+ const link=el('a');link.href=url;link.download=profile.id+'.tsv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+try{const accession=normalizeAccession(new URLSearchParams(location.search).get('accession')||'');if(!accession)throw Error('Accession not found. Enter a complete accession on the search page.');profile=await loadProfile(accession);document.title=accession+' | Abundance profile';$('profile-title').textContent=accession;const totals=new Map();for(const r of profile.rows)totals.set(r.type,r.abundance===null||totals.get(r.type)===null?null:(totals.get(r.type)||0)+r.abundance);types=[...totals].map(([name,value])=>({name,value})).sort((a,b)=>rankValue(b.value)-rankValue(a.value)||a.name.localeCompare(b.name));rows=[...profile.rows].sort((a,b)=>rankValue(b.abundance)-rankValue(a.abundance)||a.subtype.localeCompare(b.subtype));const metadata=new Map(profile.metadata.map(([key,value])=>[key.trim().toLowerCase(),value.trim()]));
+$('profile-project').textContent=metadata.get('project')||'Not available';
+$('profile-sample').textContent=metadata.get('sample')||'Not available';
+const metadataValue=key=>{
+ const raw=metadata.get(key);
+ return raw && Number.isFinite(Number(raw)) && Number(raw)>=0 ? Number(raw).toLocaleString(undefined,{maximumFractionDigits:20}) : 'Not available';
+};
+for(const [label,key,note] of [
+ ['Total abundance','abundance',`Total copy: ${metadataValue('copy')} · Genome: ${metadataValue('genome')}`],
+ ['Detected types','type','Resistance types in this sample'],
+ ['Detected subtypes','subtype','Resistance subtypes in this sample']
+]){
+ const item=el('div');item.append(el('dt','',label),el('dd','',metadataValue(key)),el('small','',note));$('metrics').append(item);
+}
+renderTypes();renderRows();table();$('state').hidden=true;$('profile').hidden=false;showMetadata(profile);}catch(e){$('state').replaceChildren(el('h2','',e.message.startsWith('Accession not found')?'Accession not found':'Unable to load profile'),el('p','',e.message));const retry=el('button','outline-button','Retry');retry.onclick=()=>location.reload();$('state').append(retry);}

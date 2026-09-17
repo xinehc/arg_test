@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Subtype explorer | ARG Atlas</title>
   <meta name="description" content="Explore matched accession counts and the top samples for a resistance type and subtype.">
-  <link rel="icon" href="./favicon.svg">
+  <link rel="icon" href="./favicon.svg?v=greenwich-1">
   <link rel="stylesheet" href="./assets/style.css">
-  <link rel="stylesheet" href="./assets/subtype.css?v=biome-filter-1">
-  <script type="module" src="./assets/subtype-page.mjs?v=static-profiles-1"></script>
+  <link rel="stylesheet" href="./assets/subtype.css?v=monospace-titles-1">
+  <script type="module" src="./assets/subtype-page.mjs?v=abundance-precision-4"></script>
 </head>
 <body>
   <main class="profile-page subtype-page">
@@ -33,7 +33,7 @@
         <p class="subtype-map-note">This map represents only the supplied top samples, not all matched accessions. Records without valid coordinates remain in the table.</p>
       </section>
       <section class="subtype-table-panel panel" aria-labelledby="samples-heading">
-        <div class="subtype-section-heading"><div><h2 id="samples-heading">Top samples</h2><p id="samples-description"></p></div><button id="download-samples" class="profile-action">Download top samples TSV ↓</button></div>
+        <div class="subtype-section-heading"><div><h2 id="samples-heading">Top samples</h2><p id="samples-description"></p></div><button id="download-samples" class="profile-action">Download TSV</button></div>
         <div class="sample-controls">
           <label>Sort by<select id="sample-sort"><option value="abundance">Abundance: high to low</option><option value="copy">Copy: high to low</option><option value="accession">Accession: A–Z</option></select></label>
           <button id="biome-filter" class="biome-filter-button" type="button" aria-pressed="false" title="Show only samples whose biome does not start with na:">Exclude na: biomes</button>

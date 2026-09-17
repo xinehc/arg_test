@@ -47,8 +47,8 @@
 .sample-controls .biome-filter-button:hover{background:#f2f7f4;border-color:#aec8bb}
 .sample-controls .biome-filter-button[aria-pressed="true"]{background:#edf5ef;border-color:#14634f;color:#14634f}
 
-.profile-summary{grid-template-columns:minmax(200px,1fr) minmax(0,3.5fr)}
-.profile-summary .subtype-metrics{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}
-.profile-summary .subtype-metrics>div{padding-left:18px}
-@media(max-width:1050px){.profile-summary{grid-template-columns:1fr}.profile-summary .subtype-metrics>div:first-child{padding-left:0}}
-@media(max-width:700px){.profile-summary .subtype-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}.profile-summary .subtype-metrics>div{padding-left:12px}.profile-summary .subtype-metrics>div:nth-child(odd){border-left:0;padding-left:0}}
+
+.profile-identifiers{display:flex;align-items:center;flex-wrap:wrap;gap:7px 16px}
+.profile-identifiers p{display:flex;align-items:center}
+
+#profile-title,#subtype-title{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}

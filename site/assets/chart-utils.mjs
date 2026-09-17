@@ -1,4 +1,4 @@
-export const formatAbundance=n=>!Number.isFinite(n)?'Not available':n>0&&n<0.0005?'<0.001':n.toLocaleString(undefined,{maximumFractionDigits:3});
+export const formatAbundance=n=>!Number.isFinite(n)?'Not available':n.toLocaleString(undefined,{maximumFractionDigits:4});
 export const matchesTypes=(type,selected)=>selected.size===0||selected.has(type);
 export const totalCopy=rows=>rows.every(r=>Number.isFinite(r.copy))?rows.reduce((s,r)=>s+r.copy,0):null;
 // Area follows log2(1 + size), with a visible minimum and an 8 px radius cap.

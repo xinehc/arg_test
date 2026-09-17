@@ -1,5 +1,5 @@
 import {el} from './common.mjs?v=static-profiles-1';
-import {formatAbundance} from './chart-utils.mjs?v=local-batches-2';
+import {formatAbundance} from './chart-utils.mjs?v=abundance-precision-4';
 import {coordinates, loadSubtype, sampleNumber} from './subtype-data.mjs?v=type-batches-1';
 
 const $ = id => document.getElementById(id);

@@ -28,7 +28,7 @@ subtype	copy	abundance
 aminoglycoside|aph(6)-I	0.086	0.26922324398356484
 ```
 
-Fields use literal tabs. The legacy `[abundance]` section name also parses. New metadata fields and original precision are retained; metadata is rendered as text. A header-only `[data]` section represents no reported resistance subtypes. An abundance value of `n/a` is unavailable, not zero: its row, affected type totals, overall abundance, and percentages display “Not available” as appropriate. Copy values and metadata remain accessible. Downloads contain only the selected profile's original text.
+Fields use literal tabs. The legacy `[abundance]` section name also parses. New metadata fields and original precision are retained; metadata is rendered as text. A header-only `[data]` section represents no reported resistance subtypes. An abundance value of `n/a` is unavailable, not zero: its row, affected type totals, overall abundance, and percentages display “Not available” as appropriate. Copy values and metadata remain accessible. Profile TSV downloads contain only the selected profile's data header and rows, preserving supplied numeric precision and excluding metadata and section markers.
 
 The browser decompresses the selected batch with `DecompressionStream`. Store each batch as a single gzip stream: concatenate the plain-text records first, then gzip the result.
 
