@@ -1,6 +1,6 @@
 {
   "profileBaseUrl": "./data/profiles",
-  "exampleAccession": "DRR000713",
+  "exampleAccession": "DRR509000",
   "fullProfilesUrl": "https://zenodo.org/records/22330481",
   "batchSuffixDigits": 3
 }

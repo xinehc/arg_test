@@ -10,7 +10,7 @@ export function profileUrl(config,accession,base=document.baseURI){
 export async function readConfig(){
  const r=await fetch('./config.json',{cache:'no-cache'});
  if(!r.ok)throw Error('Website configuration could not be loaded. Please retry.');
- const c=await r.json();profileUrl(c,'DRR000713');return c;
+ const c=await r.json();profileUrl(c,'DRR509000');return c;
 }
 
 // Every [metadata] line starts one profile. Preserve each source block exactly,
