@@ -1,6 +1,6 @@
 import {subtypeUrl} from './subtype-data.mjs?v=type-batches-1';
 import {formatAbundance,matchesTypes} from './chart-utils.mjs?v=abundance-precision-4';
-import {showMetadata} from './metadata.mjs?v=hide-accession-1';
+import {showMetadata} from './metadata.mjs?v=thousands-1';
 import {normalizeAccession,loadProfile,el} from './common.mjs?v=static-profiles-1';
 const $=id=>document.getElementById(id),palette=['#117663','#318ab5','#8864b4','#ce9250','#ce6387','#597eba','#539c82','#808c52'];
 let profile,types,rows,selectedTypes=new Set(),query='';
