@@ -98,7 +98,6 @@ async function start() {
   }
   const result = await loadSubtype(type, subtype);
   selected = result.entry; samples = result.samples;
-  document.title = `${subtype} · ${type} | ARG Atlas`;
   $('subtype-title').textContent = subtype; $('subtype-type').textContent = type;
   $('matched-count').textContent = number(selected.matched); $('sample-count').textContent = number(samples.length);
   $('samples-description').textContent = `${number(samples.length)} supplied top samples from ${number(selected.matched)} matched accessions for ${type}|${subtype}, ranked by abundance. Open an accession to view its full profile.`;

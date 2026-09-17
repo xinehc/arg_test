@@ -8,7 +8,7 @@ A static website with accession search, resistance subtype search, sample metada
 python3 -m http.server 8000 --directory site
 ```
 
-Open `http://localhost:8000`. Use HTTP rather than opening HTML files directly. The default accession example is `DRR509000`; the subtype example is `colistin|mcr-1`.
+Open `http://localhost:8000`. Use HTTP rather than opening HTML files directly. The default accession example is `DRR815000`; the subtype example is `colistin|mcr-1`.
 
 ## Accession batches
 
