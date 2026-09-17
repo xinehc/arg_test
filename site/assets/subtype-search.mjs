@@ -1,5 +1,5 @@
-import {el} from './common.mjs?v=local-batches-2';
-import {findSubtypes, loadSubtypeCatalog, subtypeUrl} from './subtype-data.mjs?v=local-batches-2';
+import {el} from './common.mjs?v=static-profiles-1';
+import {findSubtypes, loadSubtypeCatalog, subtypeUrl} from './subtype-data.mjs?v=type-batches-1';
 
 export function setupSubtypeSearch(form) {
   const input = form.querySelector('input'), results = form.querySelector('[data-results]');

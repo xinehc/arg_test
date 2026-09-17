@@ -4,11 +4,10 @@ import {readFile} from 'node:fs/promises';
 import {gzipSync} from 'node:zlib';
 import {batchProfiles,extractProfile,profileUrl,parseProfile,decodeProfileResponse,loadProfile,MAX_BATCH_BYTES} from '../site/assets/common.mjs';
 const block=(id,value=1)=>`[metadata]\naccession\t${id}\nproject\tP\n\n[data]\nsubtype\tcopy\tabundance\nA|gene\t2\t${value}\n\n`;
-const config={profileBaseUrl:'./data/profiles',batchSuffixDigits:3};
 test('three-digit batch URLs preserve zeros, Pages subpaths, and same-origin storage',()=>{
- assert.equal(profileUrl(config,' drr000713 ','https://u.github.io/repo/'),'https://u.github.io/repo/data/profiles/713.txt.gz');
- assert.equal(profileUrl(config,'ERR100001','https://u.github.io/repo/'),'https://u.github.io/repo/data/profiles/001.txt.gz');
- assert.throws(()=>profileUrl({...config,profileBaseUrl:'https://other.example'},'SRR000713','https://u.github.io/repo/'),/hosted with/);
+ assert.equal(profileUrl(' drr000713 ','https://u.github.io/repo/'),'https://u.github.io/repo/data/profiles/713.txt.gz');
+ assert.equal(profileUrl('ERR100001','https://u.github.io/repo/'),'https://u.github.io/repo/data/profiles/001.txt.gz');
+ assert.throws(()=>profileUrl('SRR71','https://u.github.io/repo/'),/ending in digits/);
 });
 test('full accession matching prevents suffix, prefix, and cross-prefix collisions',()=>{
  const text=block('DRR000713')+block('SRR000713',2)+block('SRR1000713',3);
@@ -21,7 +20,7 @@ test('full accession matching prevents suffix, prefix, and cross-prefix collisio
 });
 test('real repacked batch decodes with the browser API and uses [data]',async()=>{
  const text=await decodeProfileResponse(new Response(await readFile(new URL('../site/data/profiles/713.txt.gz',import.meta.url))),undefined,MAX_BATCH_BYTES);
- assert.ok(text.length>5_000_000);
+ assert.ok([...batchProfiles(text)].length > 1);
  const profile=parseProfile(extractProfile(text,'DRR000713'),'DRR000713');
  assert.equal(profile.rows.length,7);assert.ok(profile.rawText.includes('[data]'));
  assert.equal(Object.fromEntries(profile.metadata).accession,'DRR000713');
@@ -31,11 +30,11 @@ test('cache stores only the selected profile and distinguishes accessions sharin
  const original=globalThis.fetch;let calls=0;
  try{
   globalThis.fetch=async()=>{calls++;return new Response(gzipSync(block('DRR000713')+block('SRR000713',2)));};
-  assert.equal((await loadProfile(config,'DRR000713')).total,1);
-  assert.equal((await loadProfile(config,'drr000713')).total,1);assert.equal(calls,1);
-  assert.equal((await loadProfile(config,'SRR000713')).total,2);assert.equal(calls,2);
+  assert.equal((await loadProfile('DRR000713')).total,1);
+  assert.equal((await loadProfile('drr000713')).total,1);assert.equal(calls,1);
+  assert.equal((await loadProfile('SRR000713')).total,2);assert.equal(calls,2);
   const cached=JSON.parse([...cache.values()][0]);assert.equal(cached.id,'SRR000713');assert.equal(cached.text,block('SRR000713',2));
-  const abort=new AbortController();abort.abort();await assert.rejects(loadProfile(config,'SRR000713',abort.signal),{name:'AbortError'});
+  const abort=new AbortController();abort.abort();await assert.rejects(loadProfile('SRR000713',abort.signal),{name:'AbortError'});
  }finally{globalThis.fetch=original;}
 });
 test('new data format supports zero detections and explicitly unavailable abundance',()=>{

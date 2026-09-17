@@ -1,16 +1,8 @@
 export function normalizeAccession(value){const s=value.trim().toUpperCase();return /^[A-Z0-9][A-Z0-9_-]{0,99}$/.test(s)?s:null;}
-export function profileUrl(config,accession,base=document.baseURI){
- const id=normalizeAccession(accession),digits=config.batchSuffixDigits??3;
- if(!Number.isInteger(digits)||digits<1||digits>6)throw Error('Invalid profile batch configuration.');
- if(!id||!new RegExp(`\\d{${digits}}$`).test(id))throw Error('Accession not found. Enter a complete accession ending in digits.');
- const root=new URL((config.profileBaseUrl||'./data/profiles').replace(/\/?$/,'/'),base);
- if(root.origin!==new URL(base).origin)throw Error('Profile batches must be hosted with this website.');
- return new URL(id.slice(-digits)+'.txt.gz',root).href;
-}
-export async function readConfig(){
- const r=await fetch('./config.json',{cache:'no-cache'});
- if(!r.ok)throw Error('Website configuration could not be loaded. Please retry.');
- const c=await r.json();profileUrl(c,'DRR509000');return c;
+export function profileUrl(accession,base=document.baseURI){
+ const id=normalizeAccession(accession);
+ if(!id||! /\d{3}$/.test(id))throw Error('Accession not found. Enter a complete accession ending in digits.');
+ return new URL('./data/profiles/'+id.slice(-3)+'.txt.gz',base).href;
 }
 
 // Every [metadata] line starts one profile. Preserve each source block exactly,
@@ -92,9 +84,9 @@ export async function decodeProfileResponse(response,signal,maxBytes=MAX_PROFILE
  }
  try{return new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch{throw Error('Profile must contain UTF-8 text.');}
 }
-export async function loadProfile(config,accession,signal){
+export async function loadProfile(accession,signal){
  signal?.throwIfAborted();
- const id=normalizeAccession(accession),url=profileUrl(config,accession);
+ const id=normalizeAccession(accession),url=profileUrl(accession);
  // A batch URL is shared by many accessions. Cache only the selected profile,
  // keyed by BOTH URL and full accession, and never cache an entire batch.
  const cacheKey='arg-batch-profile-v2';

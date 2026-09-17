@@ -29,7 +29,7 @@ if git remote get-url origin >/dev/null 2>&1; then
   exit 1
 fi
 # Stage only the delivered code, never arbitrary data folders or credential files.
-git add .github .gitignore README.md QUICK_DEPLOY.md site scripts tests examples
+git add .github .gitignore README.md QUICK_DEPLOY.md site scripts tests
 git diff --cached --quiet || git commit -m 'Deploy static ARG Atlas with exact TXT accession lookup'
 gh repo create "$repo" "$2" --description 'ARG abundance explorer: GitHub Pages with local profile batches'
 git remote add origin "https://github.com/$repo.git"

@@ -1,6 +1,6 @@
-import {el} from './common.mjs?v=local-batches-2';
+import {el} from './common.mjs?v=static-profiles-1';
 import {formatAbundance} from './chart-utils.mjs?v=local-batches-2';
-import {coordinates, loadSubtypeCatalog, loadSubtypeSamples, pairKey, sampleNumber} from './subtype-data.mjs?v=local-batches-2';
+import {coordinates, loadSubtype, sampleNumber} from './subtype-data.mjs?v=type-batches-1';
 
 const $ = id => document.getElementById(id);
 let samples = [], selected, excludeNaBiomes = false;
@@ -96,10 +96,8 @@ async function start() {
     $('subtype-state').textContent = subtype ? 'Use Back to search to choose a resistance type for this subtype.' : 'Use Back to search to find a subtype and view its top samples.';
     return;
   }
-  const entries = await loadSubtypeCatalog();
-  selected = entries.find(entry => pairKey(entry.type, entry.subtype) === pairKey(type, subtype));
-  if (!selected) throw Error('This type/subtype pair was not found. Use Back to search to choose a valid pair.');
-  samples = await loadSubtypeSamples(selected);
+  const result = await loadSubtype(type, subtype);
+  selected = result.entry; samples = result.samples;
   document.title = `${subtype} · ${type} | ARG Atlas`;
   $('subtype-title').textContent = subtype; $('subtype-type').textContent = type;
   $('matched-count').textContent = number(selected.matched); $('sample-count').textContent = number(samples.length);
