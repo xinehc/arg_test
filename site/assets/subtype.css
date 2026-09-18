@@ -40,10 +40,13 @@
 .subtype-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: 0 24px;
   margin: 0;
 }
 .subtype-metrics > div {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
   border-left: 1px solid #dce6e0;
   padding-left: 24px;
 }
@@ -75,10 +78,10 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  padding: 24px 28px 18px;
+  padding: 24px var(--panel-gutter) 18px;
 }
 .subtype-section-heading h2 {
-  font-size: 18px;
+  font-size: var(--section-heading-size);
   line-height: 1.4;
 }
 .subtype-section-heading p {
@@ -149,7 +152,7 @@
   display: flex;
   align-items: end;
   gap: 20px;
-  padding: 0 28px 20px;
+  padding: 0 var(--panel-gutter) 20px;
 }
 .sample-controls label {
   display: flex;
@@ -173,40 +176,9 @@
   max-height: 660px;
   scrollbar-width: thin;
 }
-.sample-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-  text-align: left;
-}
-.sample-table th {
-  position: sticky;
-  top: 0;
-  background: #f2f7f4;
-  color: #52745f;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  z-index: 1;
-  white-space: nowrap;
-  border-block: 1px solid #dce6e0;
-}
-.sample-table th,
 .sample-table td {
-  padding: 13px 16px;
-}
-.sample-table th:first-child,
-.sample-table td:first-child {
-  padding-left: 28px;
-}
-.sample-table td {
-  border-bottom: 1px solid #e8eeea;
-  line-height: 1.5;
-  vertical-align: top;
   min-width: 140px;
   max-width: 250px;
-  overflow-wrap: anywhere;
 }
 .sample-table td:first-child {
   min-width: 80px;
@@ -228,9 +200,6 @@
   text-underline-offset: 3px;
   white-space: nowrap;
 }
-.sample-table tr:hover td {
-  background: #f7faf9;
-}
 @media (max-width: 1050px) {
   .subtype-summary {
     grid-template-columns: 1fr;
@@ -246,7 +215,7 @@
     padding: 20px;
   }
   .subtype-metrics {
-    gap: 12px;
+    column-gap: 12px;
   }
   .subtype-metrics > div {
     padding-left: 12px;
@@ -261,22 +230,19 @@
     font-size: 10px;
   }
   .subtype-section-heading {
-    padding: 20px 18px 16px;
+    padding: 20px var(--panel-gutter) 16px;
     flex-wrap: wrap;
     gap: 12px;
-  }
-  .subtype-section-heading h2 {
-    font-size: 17px;
   }
   .map-key {
     display: none;
   }
   .map-status,
   .subtype-map-note {
-    margin-inline: 18px;
+    margin-inline: var(--panel-gutter);
   }
   .sample-controls {
-    padding: 0 18px 18px;
+    padding: 0 var(--panel-gutter) 18px;
     flex-wrap: wrap;
     gap: 12px;
   }
@@ -285,10 +251,6 @@
   }
   .subtype-map {
     border-radius: 0;
-  }
-  .sample-table th:first-child,
-  .sample-table td:first-child {
-    padding-left: 18px;
   }
 }
 
