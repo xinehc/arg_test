@@ -1,4 +1,4 @@
-import {buildLandCells} from './globe-land.mjs?v=gap-1';
+import {buildLandCells, LAND_COLUMNS} from './globe-land.mjs?v=shared-grid-1';
 import {el} from './common.mjs?v=static-profiles-1';
 import {formatAbundance} from './chart-utils.mjs?v=abundance-precision-4';
 import {coordinates, loadSubtype, sampleNumber} from './subtype-data.mjs?v=type-batches-1';
@@ -67,10 +67,11 @@ async function renderMap() {
   try {
     const response = await fetch(new URL('./globe/land-points.json', import.meta.url));
     if (!response.ok) throw Error('Land layer unavailable');
-    const cells = buildLandCells(await response.json()); ctx.fillStyle = '#d2e2d8';ctx.globalAlpha=0.5
+    const cells = buildLandCells(await response.json());
+    ctx.save(); ctx.fillStyle = '#d2e2d8'; ctx.globalAlpha = .5;
     // Project the shared land grid onto the flat map. Draw regular hexagons
-    // with a small, uniform gap instead of stretching cells near the poles.
-    const radius = 1000 / 240 / Math.sqrt(3) * 1;
+    // with shared edges instead of stretching cells near the poles.
+    const radius = 1000 / LAND_COLUMNS / Math.sqrt(3);
     for (const {center: [x, y, z]} of cells) {
       const lon = Math.atan2(x, z) * 180 / Math.PI, lat = Math.asin(Math.max(-1, Math.min(1, y))) * 180 / Math.PI;
       const cx = (lon + 180) / 360 * 1000, cy = (90 - lat) / 180 * 500;
@@ -86,6 +87,7 @@ async function renderMap() {
         ctx.closePath(); ctx.fill();
       }
     }
+    ctx.restore();
   } catch { $('map-status').textContent = 'The background map is unavailable. Sample markers and coordinates are still shown.'; }
 }
 

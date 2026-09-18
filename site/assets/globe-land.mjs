@@ -1,4 +1,5 @@
 const TAU=Math.PI*2;
+export const LAND_COLUMNS=240;
 const surface=(lon,lat)=>[Math.cos(lat)*Math.sin(lon),Math.sin(lat),Math.cos(lat)*Math.cos(lon)];
 
 export function buildLandCells(points){
@@ -21,8 +22,8 @@ export function buildLandCells(points){
     return false;
   };
   // More columns = smaller connected hexagons (240 is 25% smaller than 180).
-  const columns=240,dx=TAU/columns,side=dx/Math.sqrt(3),dy=side*1.5;
-  // Inset each hexagon by 14% to leave a small gap; 1 restores touching cells.
+  const columns=LAND_COLUMNS,dx=TAU/columns,side=dx/Math.sqrt(3),dy=side*1.5;
+  // A scale of 1 keeps neighbouring cells touching.
   const cellScale=1;
   const cells=[],vertices=new Map();
   // Integer lattice coordinates guarantee that neighbours reuse the same
