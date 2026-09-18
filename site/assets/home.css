@@ -1,7 +1,7 @@
 .atlas-home{position:relative;isolation:isolate;margin:0;background:#f7faf9;color:#143e35;font-family:Arial,Helvetica,sans-serif}
 .atlas-home header{position:relative;z-index:1;height:96px;max-width:1440px;margin:auto;padding:0 6%;border-bottom:1px solid #dce7e2;background:transparent;display:flex;gap:26px}
 .home-main{position:relative;z-index:1;box-sizing:border-box;width:100%;max-width:1440px;min-height:100vh;min-height:100svh;margin:auto;padding:0 6%;display:flex;flex-direction:column}
-.home-hero{display:flex;flex:1;align-items:center;justify-content:flex-start;padding:48px 0;text-align:left}
+.home-hero{display:flex;flex:1;align-items:center;justify-content:flex-start;padding:28px 0;text-align:left}
 .home-content{position:relative;z-index:1;width:100%;max-width:680px}
 .atlas-home .eyebrow{color:#427a68;font-size:12px;letter-spacing:2px;font-weight:600;margin-bottom:25px}
 .atlas-home h1{font-size:clamp(40px,4.6vw,68px);font-weight:500;line-height:1.08;letter-spacing:-2.8px;margin:0 0 25px}
@@ -11,7 +11,7 @@
 .atlas-home .accession-form{display:block}
 .atlas-home .primary-button{white-space:nowrap;padding:15px 18px;font-size:14px;border:0;border-radius:6px;background:#14634f;min-height:48px;cursor:pointer}
 .atlas-home .primary-button:hover{background:#0c4c3b}
-.atlas-home .search-hint{font-size:14px;margin:22px 0 0;color:#6d8177;gap:10px;justify-content:flex-start}
+.atlas-home .search-hint{font-size:14px;margin:14px 0 0;color:#6d8177;gap:10px;justify-content:flex-start}
 .atlas-home .search-hint button,.atlas-home .search-hint a[href]{display:inline;background:none;border:0;border-radius:0;padding:0;color:#226b54;font:inherit;line-height:inherit;vertical-align:baseline;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;cursor:pointer}
 .globe-background{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;user-select:none}
 .globe-background canvas{position:absolute;width:clamp(850px,100vw,1500px);height:auto;aspect-ratio:1;max-width:none;right:-18%;top:50%;transform:translateY(-50%);opacity:.22;mask-image:linear-gradient(to right,transparent 4%,#000 48%);display:block}
@@ -25,7 +25,7 @@
 }
 @media(max-width:700px){
 .atlas-home header{height:78px}
-.home-hero{padding:36px 0}
+.home-hero{padding:24px 0}
 .atlas-home h1{font-size:46px;letter-spacing:-1.8px}
 .atlas-home .eyebrow{margin-bottom:20px;font-size:11px}
 .home-intro{font-size:16px;margin-bottom:26px}
@@ -37,7 +37,7 @@
 @media(max-width:380px){
 .atlas-home h1{font-size:39px}
 }
-.atlas-home .home-lab{position:relative;display:flex;align-items:center;justify-content:center;gap:32px;margin:0;flex-shrink:0;padding:24px 0;border-top:1px solid #cdded5;background:transparent}
+.atlas-home .home-lab{position:relative;display:flex;align-items:center;justify-content:center;gap:32px;margin:0;flex-shrink:0;padding:16px 0;border-top:1px solid #cdded5;background:transparent}
 .logo-filters{position:absolute;overflow:hidden;pointer-events:none}
 .lab-logos{display:flex;align-items:center;gap:24px;flex-shrink:0}
 .lab-logo{display:block;width:100px;height:100px;object-fit:contain;filter:url(#lab-ink)}
@@ -46,12 +46,14 @@
 .lab-wordmark p{margin:0 0 10px;color:#315f50;font-size:15px;line-height:1.5}
 .lab-wordmark>span{font-size:12px;letter-spacing:.3px;color:#71877c}
 @media(max-width:700px){
-.atlas-home .home-lab{flex-direction:column;gap:20px;padding:28px 0 32px}
+.atlas-home .home-lab{flex-direction:column;gap:12px;padding:16px 0 20px}
 .lab-logos{gap:28px}
 .lab-logo{width:92px;height:92px}
 .lab-logo-university{width:82px}
 .lab-wordmark{padding:0;border:0;text-align:center}
 .lab-wordmark p{font-size:14px;margin-bottom:8px}
 }
-.atlas-home .search-hint{display:block;line-height:1.8}
+.atlas-home .search-hint{display:block;line-height:1.6}
 .atlas-home .search-hint a[aria-disabled="true"]{color:inherit}
+
+.lab-citation{margin-bottom:8px}

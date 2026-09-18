@@ -34,7 +34,7 @@
 .sample-table th,.sample-table td{padding:13px 16px}
 .sample-table th:first-child,.sample-table td:first-child{padding-left:28px}
 .sample-table td{border-bottom:1px solid #e8eeea;line-height:1.5;vertical-align:top;min-width:140px;max-width:250px;overflow-wrap:anywhere}
-.sample-table td:first-child{min-width:55px;color:#7c8e80;font-variant-numeric:tabular-nums}
+.sample-table td:first-child{min-width:80px;white-space:nowrap;color:#7c8e80;font-variant-numeric:tabular-nums}
 .sample-table td:nth-child(3),.sample-table td:nth-child(4){font-variant-numeric:tabular-nums;white-space:nowrap}
 .sample-table td:last-child{white-space:nowrap}
 .sample-table a{color:#14634f;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
@@ -52,3 +52,5 @@
 .profile-identifiers p{display:flex;align-items:center}
 
 #profile-title,#subtype-title{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+.profile-summary .subtype-metrics small{overflow-wrap:anywhere}
