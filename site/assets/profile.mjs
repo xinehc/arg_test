@@ -47,8 +47,14 @@ $('download').onclick=()=>{
  const link=el('a');link.href=url;link.download=profile.id+'.tsv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 try{const accession=normalizeAccession(new URLSearchParams(location.search).get('accession')||'');if(!accession)throw Error('Accession not found. Enter a complete accession on the search page.');profile=await loadProfile(accession);$('profile-title').textContent=accession;const totals=new Map();for(const r of profile.rows)totals.set(r.type,r.abundance===null||totals.get(r.type)===null?null:(totals.get(r.type)||0)+r.abundance);types=[...totals].map(([name,value])=>({name,value})).sort((a,b)=>rankValue(b.value)-rankValue(a.value)||a.name.localeCompare(b.name));rows=[...profile.rows].sort((a,b)=>rankValue(b.abundance)-rankValue(a.abundance)||a.subtype.localeCompare(b.subtype));const metadata=new Map(profile.metadata.map(([key,value])=>[key.trim().toLowerCase(),value.trim()]));
-$('profile-project').textContent=metadata.get('project')||'Not available';
-$('profile-sample').textContent=metadata.get('sample')||'Not available';
+for(const [field,database,pattern] of [['project','bioproject',/^(?:PRJ[A-Z]+)?\d+$/i],['sample','biosample',/^(?:SAM[A-Z]+)?\d+$/i]]){
+ const value=metadata.get(field)||'Not available',container=$('profile-'+field);
+ if(pattern.test(value)){
+  const link=el('a','subtype-link',value);
+  link.href=`https://www.ncbi.nlm.nih.gov/${database}/${encodeURIComponent(value)}/`;
+  container.replaceChildren(link);
+ }else container.textContent=value;
+}
 const metadataValue=key=>{
  const raw=metadata.get(key);
  return raw && Number.isFinite(Number(raw)) && Number(raw)>=0 ? Number(raw).toLocaleString(undefined,key==='abundance'?{minimumFractionDigits:2,maximumFractionDigits:2}:{maximumFractionDigits:20}) : 'Not available';

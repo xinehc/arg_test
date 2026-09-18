@@ -186,7 +186,7 @@ select{border:1px solid #dce5de;background:#fff;color:#20382e;border-radius:6px;
 .data-table th,.data-table td{border-bottom:1px solid #e6ede8;padding:12px;font-size:14px}
 .data-table th{color:#6b8173}
 .data-table td:nth-last-child(-n+2){font-variant-numeric:tabular-nums}
-.metadata-panel{padding:22px 30px;border-top:1px solid #dce6e0}
+.metadata-panel{padding:22px 30px}
 .metadata-panel h3{font-size:18px}
 .metadata-panel>p{font-size:13px;color:#667d70;line-height:1.5;margin:10px 0 18px}
 .metadata-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 24px;margin:0}
