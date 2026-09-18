@@ -17,6 +17,7 @@ export function setupSubtypeSearch(form) {
     setSearchBusy(submit, false);
     if (!query) { status.textContent = ''; return; }
     status.textContent = '';
+    let navigating = false;
     if (navigate) setSearchBusy(submit, true);
     try {
       const entries = await loadSubtypeCatalog();
@@ -25,7 +26,7 @@ export function setupSubtypeSearch(form) {
       const exact = matches.filter(entry => entry.subtype.toLowerCase() === query.toLowerCase() ||
         `${entry.type}|${entry.subtype}`.toLowerCase() === query.toLowerCase());
       const choices = exact.length ? exact : matches;
-      if (navigate && choices.length === 1) { location.assign(subtypeUrl(choices[0])); return; }
+      if (navigate && choices.length === 1) { location.assign(subtypeUrl(choices[0])); navigating = true; return; }
       status.textContent = matches.length ? `${matches.length.toLocaleString()} matching type/subtype pair${matches.length === 1 ? '' : 's'}. ${matches.length > 12 ? 'Showing the first 12; refine your search.' : 'Choose a result below.'}` : '';
       if (!matches.length && navigate) showError('No matching subtype. Check the subtype and try again.');
       for (const entry of matches.slice(0, 12)) {
@@ -38,7 +39,7 @@ export function setupSubtypeSearch(form) {
     } catch (error) {
       if (current === generation && navigate) showError(error.message);
     } finally {
-      if (current === generation) setSearchBusy(submit, false);
+      if (current === generation && !navigating) setSearchBusy(submit, false);
     }
   }
   input.addEventListener('input', () => { void search(); });
