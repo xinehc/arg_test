@@ -18,7 +18,7 @@ function renderSamples() {
     const row = el('tr'), accession = el('td'), link = el('a', '', sample.accession);
     link.href = './profile.html?' + new URLSearchParams({accession: sample.accession});
     accession.append(link); row.append(el('td', '', rank), accession);
-    for (const field of ['abundance', 'copy']) {
+    for (const field of ['copy', 'abundance']) {
       const cell = el('td', '', Number.isFinite(Number(sample[field])) ? formatAbundance(Number(sample[field])) : 'Not available');
       cell.title = sample[field]; row.append(cell);
     }

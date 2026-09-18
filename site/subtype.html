@@ -8,7 +8,7 @@
   <link rel="icon" href="./favicon.svg?v=greenwich-coastlines-3">
   <link rel="stylesheet" href="./assets/style.css">
   <link rel="stylesheet" href="./assets/subtype.css?v=monospace-titles-1">
-  <script type="module" src="./assets/subtype-page.mjs?v=consistent-title-1"></script>
+  <script type="module" src="./assets/subtype-page.mjs?v=copy-first-1"></script>
 </head>
 <body>
   <main class="profile-page subtype-page">
@@ -16,7 +16,7 @@
     <div id="subtype-state" class="panel empty" role="status">Loading subtype…</div>
     <article id="subtype-detail" hidden>
       <section class="subtype-summary panel" aria-labelledby="subtype-title">
-        <div class="subtype-identity"><span class="eyebrow">RESISTANCE SUBTYPE</span><h2 id="subtype-title"></h2><p>Type <strong id="subtype-type"></strong></p></div>
+        <div class="subtype-identity"><span class="eyebrow">SUBTYPE</span><h2 id="subtype-title"></h2><p>Type <strong id="subtype-type"></strong></p></div>
         <dl class="subtype-metrics">
           <div><dt>Matched accessions</dt><dd id="matched-count"></dd><small>Across the full collection</small></div>
           <div><dt>Top samples supplied</dt><dd id="sample-count"></dd><small>Ranked by abundance</small></div>
@@ -40,10 +40,11 @@
           <p id="sample-filter-status" role="status"></p>
         </div>
         <div class="sample-table-scroll" tabindex="0" role="region" aria-label="Top sample metadata, scroll horizontally for all columns">
-          <table class="sample-table"><caption class="sr-only">Metadata for the supplied top samples; abundance rank is retained when sorting or filtering.</caption><thead><tr><th scope="col">Rank</th><th scope="col">Accession</th><th scope="col">Abundance</th><th scope="col">Copy</th><th scope="col">Scientific name</th><th scope="col">Biome</th><th scope="col">Location</th><th scope="col">Collection date</th><th scope="col">Latitude / longitude</th></tr></thead><tbody id="sample-rows"></tbody></table>
+          <table class="sample-table"><caption class="sr-only">Metadata for the supplied top samples; abundance rank is retained when sorting or filtering.</caption><thead><tr><th scope="col">Rank</th><th scope="col">Accession</th><th scope="col">Copy</th><th scope="col">Abundance</th><th scope="col">Scientific name</th><th scope="col">Biome</th><th scope="col">Location</th><th scope="col">Collection date</th><th scope="col">Latitude / longitude</th></tr></thead><tbody id="sample-rows"></tbody></table>
         </div>
         <p id="sample-empty" class="subtype-empty" hidden>No supplied samples match this filter.</p>
         <p class="sample-footnote">Metadata values are shown as supplied. “na” denotes unavailable metadata; missing abundance is shown as Not available; TSV downloads retain the original numeric precision.</p>
+        <div class="detail-note">Profiled using Lynx v0.1.0 with SARG+ version <a href="https://zenodo.org/records/16228940">2025-07-21</a>.</div>
       </section>
     </article>
     <noscript>Enable JavaScript to search subtypes and view their sample metadata.</noscript>
