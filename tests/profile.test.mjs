@@ -1,8 +1,73 @@
-import {gunzipSync} from 'node:zlib';
-import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
-import {extractProfile,normalizeAccession,parseProfile,profileUrl,loadProfile} from '../site/assets/common.mjs';
-const txt=extractProfile(gunzipSync(await readFile(new URL('../site/data/profiles/713.txt.gz',import.meta.url))).toString('utf8'),'DRR000713');
-test('native TXT preserves subtype modifiers, copy, and abundance',()=>{const p=parseProfile(txt,'DRR000713');assert.equal(p.rows.length,7);assert.equal(p.typeCount,5);assert.equal(p.subtypeCount,7);assert.equal(p.rows[0].copy,.09);assert.equal(p.rows[5].type,'multidrug@RND');assert.equal(p.rows[1].subtype,'bla*');assert.ok(Math.abs(p.total-1.1114)<1e-14);});
-test('exact accessor never expands prefixes and supports Pages subpaths',()=>{assert.equal(normalizeAccession(' drr000713 '),'DRR000713');assert.equal(normalizeAccession('../DRR000713'),null);assert.equal(normalizeAccession('DRR000713.txt'),null);assert.equal(profileUrl('DRR000713','https://u.github.io/argmap/'),'https://u.github.io/argmap/data/profiles/713.txt.gz');assert.equal(profileUrl('DRR00071','https://u.github.io/argmap/'),'https://u.github.io/argmap/data/profiles/071.txt.gz');});
-test('canonical, zero and scientific notation are supported; invalid rows fail',()=>{const p=parseProfile('type\tsubtype\tabundance\nA\ta\t1e-6\nA\tb\t0','X');assert.equal(p.total,1e-6);assert.equal(p.subtypeCount,1);for(const a of ['NaN','Infinity','-1',''])assert.throws(()=>parseProfile(`type\tsubtype\tabundance\nA\ta\t${a}`,'X'));assert.throws(()=>parseProfile('type\tsubtype\tabundance\nA\ta\t1\nA\ta\t2','X'));});
-test('404, authorization errors, network errors and successful TXT are distinct',async()=>{globalThis.document={baseURI:'https://u.github.io/repo/'};globalThis.sessionStorage={getItem:()=>null,setItem:()=>{}};const original=globalThis.fetch;try{globalThis.fetch=async()=>new Response('',{status:404});await assert.rejects(loadProfile('MISSING713'),/Accession not found/);globalThis.fetch=async()=>new Response('',{status:403});await assert.rejects(loadProfile('MISSING713'),/temporarily unavailable/);globalThis.fetch=async()=>{throw Error('network')};await assert.rejects(loadProfile('MISSING713'),/Could not reach/);globalThis.fetch=async()=>new Response(txt);assert.equal((await loadProfile('DRR000713')).rows.length,7);}finally{globalThis.fetch=original;}});
+import { gunzipSync } from "node:zlib";
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import {
+  extractProfile,
+  normalizeAccession,
+  parseProfile,
+  profileUrl,
+  loadProfile,
+} from "../site/assets/common.mjs";
+const txt = extractProfile(
+  gunzipSync(
+    await readFile(
+      new URL("../site/data/profiles/713.txt.gz", import.meta.url),
+    ),
+  ).toString("utf8"),
+  "DRR000713",
+);
+test("native TXT preserves subtype modifiers, copy, and abundance", () => {
+  const p = parseProfile(txt, "DRR000713");
+  assert.equal(p.rows.length, 7);
+  assert.equal(p.typeCount, 5);
+  assert.equal(p.subtypeCount, 7);
+  assert.equal(p.rows[0].copy, 0.09);
+  assert.equal(p.rows[5].type, "multidrug@RND");
+  assert.equal(p.rows[1].subtype, "bla*");
+  assert.ok(Math.abs(p.total - 1.1114) < 1e-14);
+});
+test("exact accessor never expands prefixes and supports Pages subpaths", () => {
+  assert.equal(normalizeAccession(" drr000713 "), "DRR000713");
+  assert.equal(normalizeAccession("../DRR000713"), null);
+  assert.equal(normalizeAccession("DRR000713.txt"), null);
+  assert.equal(
+    profileUrl("DRR000713", "https://u.github.io/argmap/"),
+    "https://u.github.io/argmap/data/profiles/713.txt.gz",
+  );
+  assert.equal(
+    profileUrl("DRR00071", "https://u.github.io/argmap/"),
+    "https://u.github.io/argmap/data/profiles/071.txt.gz",
+  );
+});
+test("canonical, zero and scientific notation are supported; invalid rows fail", () => {
+  const p = parseProfile("type\tsubtype\tabundance\nA\ta\t1e-6\nA\tb\t0", "X");
+  assert.equal(p.total, 1e-6);
+  assert.equal(p.subtypeCount, 1);
+  for (const a of ["NaN", "Infinity", "-1", ""])
+    assert.throws(() =>
+      parseProfile(`type\tsubtype\tabundance\nA\ta\t${a}`, "X"),
+    );
+  assert.throws(() =>
+    parseProfile("type\tsubtype\tabundance\nA\ta\t1\nA\ta\t2", "X"),
+  );
+});
+test("404, authorization errors, network errors and successful TXT are distinct", async () => {
+  globalThis.document = { baseURI: "https://u.github.io/repo/" };
+  globalThis.sessionStorage = { getItem: () => null, setItem: () => {} };
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => new Response("", { status: 404 });
+    await assert.rejects(loadProfile("MISSING713"), /Accession not found/);
+    globalThis.fetch = async () => new Response("", { status: 403 });
+    await assert.rejects(loadProfile("MISSING713"), /temporarily unavailable/);
+    globalThis.fetch = async () => {
+      throw Error("network");
+    };
+    await assert.rejects(loadProfile("MISSING713"), /Could not reach/);
+    globalThis.fetch = async () => new Response(txt);
+    assert.equal((await loadProfile("DRR000713")).rows.length, 7);
+  } finally {
+    globalThis.fetch = original;
+  }
+});

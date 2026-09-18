@@ -1,50 +1,197 @@
-.accession-form>label,.subtype-search-form>label{display:block;font-size:14px;font-weight:600;margin-bottom:12px}
-.search-entry{display:flex;align-items:center;gap:10px;border:1px solid #a8c4b8;border-radius:10px;background:#fff;padding:7px;box-shadow:0 5px 20px #164b3610}
-.search-entry:focus-within{outline:2px solid #27876b;outline-offset:3px}
-.search-symbol{color:#729285;font-size:28px;margin-left:8px}
-.search-entry input{min-width:0;width:100%;flex:1;height:44px;font-size:15px;outline:none}
-.search-entry input::placeholder{color:#74897e}
-@media(max-width:1050px){
-.search-entry{flex-wrap:wrap}
-.search-entry input{width:70%}
-.search-entry .primary-button{flex-basis:100%}
+.accession-form > label,
+.subtype-search-form > label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
-@media(max-width:700px){
-.search-entry{flex-wrap:nowrap}
-.search-entry input{width:100%;font-size:14px}
-.search-entry .primary-button{flex-basis:auto;padding-inline:12px}
-.search-symbol{display:none}
+.search-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #a8c4b8;
+  border-radius: 10px;
+  background: #fff;
+  padding: 7px;
+  box-shadow: 0 5px 20px #164b3610;
 }
-@media(max-width:380px){
-.search-entry{flex-wrap:wrap}
-.search-entry .primary-button{flex-basis:100%}
+.search-entry:focus-within {
+  outline: 2px solid #27876b;
+  outline-offset: 3px;
 }
-.search-modes{display:flex;gap:4px;width:fit-content;margin:0 0 22px;padding:4px;border:1px solid #ccded4;border-radius:9px;background:#eef4f0}
-.search-modes label{position:relative;cursor:pointer}
-.search-modes input{position:absolute;opacity:0;width:1px;height:1px}
-.search-modes span{display:block;padding:9px 18px;border-radius:6px;font-size:14px;color:#60796e}
-.search-modes input:checked+span{background:white;box-shadow:0 1px 4px #164b3615;color:#14634f;font-weight:600}
-.search-modes input:focus-visible+span{outline:2px solid #14634f;outline-offset:2px}
-.subtype-search-help,.subtype-search-status{font-size:13px;line-height:1.5;color:#60796e;margin:12px 0 0}
-.subtype-search-status:empty{display:none}
-.subtype-results{list-style:none;margin:12px 0 0;padding:0;max-height:320px;overflow-y:auto;border-radius:8px;background:#fff}
-.subtype-results:empty{display:none}
-.subtype-results li+li{border-top:1px solid #e4ece6}
-.subtype-result{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid transparent}
-.subtype-result:hover{background:#edf5ef}
-.subtype-result:focus-visible{outline:2px solid #14634f;outline-offset:-2px}
-.subtype-result-name{min-width:0;overflow-wrap:anywhere}
-.subtype-result-name strong{display:block;font-size:15px;font-weight:600}
-.subtype-result-name small{display:block;margin-top:4px;color:#6d8177;font-size:12px}
-.subtype-result-count{flex-shrink:0;font-size:12px;color:#52745f}
-@media(max-width:420px){.subtype-result{gap:8px}.subtype-result-count{font-size:11px}}
+.search-symbol {
+  color: #729285;
+  font-size: 28px;
+  margin-left: 8px;
+}
+.search-entry input {
+  min-width: 0;
+  width: 100%;
+  flex: 1;
+  height: 44px;
+  font-size: 15px;
+  outline: none;
+}
+.search-entry input::placeholder {
+  color: #74897e;
+}
+@media (max-width: 1050px) {
+  .search-entry {
+    flex-wrap: wrap;
+  }
+  .search-entry input {
+    width: 70%;
+  }
+  .search-entry .primary-button {
+    flex-basis: 100%;
+  }
+}
+@media (max-width: 700px) {
+  .search-entry {
+    flex-wrap: nowrap;
+  }
+  .search-entry input {
+    width: 100%;
+    font-size: 14px;
+  }
+  .search-entry .primary-button {
+    flex-basis: auto;
+    padding-inline: 12px;
+  }
+  .search-symbol {
+    display: none;
+  }
+}
+@media (max-width: 380px) {
+  .search-entry {
+    flex-wrap: wrap;
+  }
+  .search-entry .primary-button {
+    flex-basis: 100%;
+  }
+}
+.search-modes {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 0 22px;
+  padding: 4px;
+  border: 1px solid #ccded4;
+  border-radius: 9px;
+  background: #eef4f0;
+}
+.search-modes label {
+  position: relative;
+  cursor: pointer;
+}
+.search-modes input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.search-modes span {
+  display: block;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #60796e;
+}
+.search-modes input:checked + span {
+  background: white;
+  box-shadow: 0 1px 4px #164b3615;
+  color: #14634f;
+  font-weight: 600;
+}
+.search-modes input:focus-visible + span {
+  outline: 2px solid #14634f;
+  outline-offset: 2px;
+}
+.subtype-search-status {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #60796e;
+  margin: 12px 0 0;
+}
+.subtype-search-status:empty {
+  display: none;
+}
+.subtype-results {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: #fff;
+}
+.subtype-results:empty {
+  display: none;
+}
+.subtype-results li + li {
+  border-top: 1px solid #e4ece6;
+}
+.subtype-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+}
+.subtype-result:hover {
+  background: #edf5ef;
+}
+.subtype-result:focus-visible {
+  outline: 2px solid #14634f;
+  outline-offset: -2px;
+}
+.subtype-result-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.subtype-result-name strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+.subtype-result-name small {
+  display: block;
+  margin-top: 4px;
+  color: #6d8177;
+  font-size: 12px;
+}
+.subtype-result-count {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #52745f;
+}
+@media (max-width: 420px) {
+  .subtype-result {
+    gap: 8px;
+  }
+  .subtype-result-count {
+    font-size: 11px;
+  }
+}
 
-.home-search:has(input[value="subtype"]:checked) #example-wrap{display:none}
+.home-search:has(input[value="subtype"]:checked) #example-wrap {
+  display: none;
+}
 
 /* Keep both examples visible on mobile as well as desktop. */
-.atlas-home .search-hint>span{display:inline}
+.atlas-home .search-hint > span {
+  display: inline;
+}
 
-.home-search #subtype-example-wrap{display:none}
-.home-search:has(input[value="subtype"]:checked) #subtype-example-wrap{display:inline}
+.home-search #subtype-example-wrap {
+  display: none;
+}
+.home-search:has(input[value="subtype"]:checked) #subtype-example-wrap {
+  display: inline;
+}
 
-.search-entry .primary-button svg{display:block;flex-shrink:0}
+.search-entry .primary-button svg {
+  display: block;
+  flex-shrink: 0;
+}
