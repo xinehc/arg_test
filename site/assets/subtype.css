@@ -23,15 +23,15 @@
 }
 .subtype-identity p {
   font-size: 13px;
-  color: #718579;
+  color: var(--muted);
   margin: 0;
   line-height: 1.6;
 }
 .subtype-identity strong {
   display: inline-block;
   margin-left: 8px;
-  background: #edf5ef;
-  color: #315f50;
+  background: var(--surface-selected);
+  color: var(--secondary);
   padding: 3px 9px;
   border-radius: 4px;
   overflow-wrap: anywhere;
@@ -47,12 +47,12 @@
   display: grid;
   grid-template-rows: subgrid;
   grid-row: span 3;
-  border-left: 1px solid #dce6e0;
+  border-left: 1px solid var(--border);
   padding-left: 24px;
 }
 .subtype-metrics dt {
   font-size: 13px;
-  color: #627c6d;
+  color: var(--secondary);
   line-height: 1.5;
 }
 .subtype-metrics dd {
@@ -60,14 +60,14 @@
   font-size: 34px;
   font-weight: 500;
   letter-spacing: -1px;
-  color: #14634f;
+  color: var(--primary);
   font-variant-numeric: tabular-nums;
 }
 .subtype-metrics small {
   font-size: 11px;
   line-height: 1.5;
   display: block;
-  color: #718579;
+  color: var(--muted);
 }
 .subtype-map-panel,
 .subtype-table-panel {
@@ -87,7 +87,7 @@
 .subtype-section-heading p {
   font-size: 13px;
   line-height: 1.6;
-  color: #6d8177;
+  color: var(--muted);
   margin: 7px 0 0;
 }
 .map-key {
@@ -95,13 +95,13 @@
   align-items: center;
   gap: 7px;
   font-size: 12px;
-  color: #52745f;
+  color: var(--secondary);
   white-space: nowrap;
 }
 .map-key i {
   width: 8px;
   height: 8px;
-  background: #27876b;
+  background: var(--accent);
   border-radius: 50%;
 }
 .subtype-map {
@@ -109,7 +109,7 @@
   aspect-ratio: 2;
   max-width: 960px;
   margin: 0 auto;
-  background: #f7faf9;
+  background: var(--surface-muted);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -121,9 +121,9 @@
   height: 100%;
 }
 .subtype-map circle {
-  fill: #27876b;
+  fill: var(--accent);
   fill-opacity: 0.6;
-  stroke: #14634f;
+  stroke: var(--primary);
   stroke-width: 1.2;
 }
 .subtype-map circle:hover,
@@ -138,13 +138,13 @@
   margin: 10px 28px 0;
   font-size: 12px;
   line-height: 1.5;
-  color: #315f50;
+  color: var(--secondary);
   text-align: center;
 }
 .subtype-map-note {
   font-size: 12px;
   line-height: 1.6;
-  color: #718579;
+  color: var(--muted);
   margin: 10px 28px 22px;
   text-align: center;
 }
@@ -158,7 +158,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: #627c6d;
+  color: var(--secondary);
   font-size: 12px;
 }
 .sample-controls select {
@@ -167,7 +167,7 @@
 }
 .sample-controls p {
   font-size: 12px;
-  color: #718579;
+  color: var(--muted);
   margin: 0 0 10px auto;
   white-space: nowrap;
 }
@@ -183,7 +183,7 @@
 .sample-table td:first-child {
   min-width: 80px;
   white-space: nowrap;
-  color: #7c8e80;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 .sample-table td:nth-child(3),
@@ -195,7 +195,7 @@
   white-space: nowrap;
 }
 .sample-table a {
-  color: #14634f;
+  color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 3px;
   white-space: nowrap;
@@ -257,21 +257,21 @@
 .sample-controls .biome-filter-button {
   height: 39px;
   padding: 8px 12px;
-  border: 1px solid #dce5de;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: #fff;
-  color: #20382e;
+  background: var(--surface);
+  color: var(--foreground);
   font-size: 14px;
   white-space: nowrap;
 }
 .sample-controls .biome-filter-button:hover {
-  background: #f2f7f4;
-  border-color: #aec8bb;
+  background: var(--surface-header);
+  border-color: var(--border-hover);
 }
 .sample-controls .biome-filter-button[aria-pressed="true"] {
-  background: #edf5ef;
-  border-color: #14634f;
-  color: #14634f;
+  background: var(--surface-selected);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .profile-identifiers {

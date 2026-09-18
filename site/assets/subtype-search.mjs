@@ -122,9 +122,9 @@ function syncSearchMode(focus = false) {
   if (focus)
     document
       .querySelector(subtype ? "#subtype-query-home" : "#accession")
-      .focus();
+      .focus({ preventScroll: true });
 }
 for (const mode of modes)
   mode.addEventListener("change", () => syncSearchMode(true));
-syncSearchMode();
-window.addEventListener("pageshow", () => syncSearchMode());
+syncSearchMode(true);
+window.addEventListener("pageshow", () => syncSearchMode(true));

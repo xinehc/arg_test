@@ -2,8 +2,8 @@
   position: relative;
   isolation: isolate;
   margin: 0;
-  background: #f7faf9;
-  color: #143e35;
+  background: var(--background);
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 .atlas-home header {
@@ -13,7 +13,7 @@
   max-width: 1440px;
   margin: auto;
   padding: 0 6%;
-  border-bottom: 1px solid #dce7e2;
+  border-bottom: 1px solid var(--border);
   background: transparent;
   display: flex;
   gap: 26px;
@@ -46,7 +46,7 @@
   max-width: 680px;
 }
 .atlas-home .eyebrow {
-  color: #427a68;
+  color: var(--secondary);
   font-size: 12px;
   letter-spacing: 2px;
   font-weight: 600;
@@ -60,12 +60,12 @@
   margin: 0 0 25px;
 }
 .atlas-home h1 span {
-  color: #29a385;
+  color: var(--accent);
 }
 .home-intro {
   font-size: 18px;
   line-height: 1.65;
-  color: #60796e;
+  color: var(--muted);
   margin-bottom: 34px;
 }
 .home-search {
@@ -81,17 +81,17 @@
   font-size: 14px;
   border: 0;
   border-radius: 6px;
-  background: #14634f;
+  background: var(--primary);
   min-height: 48px;
   cursor: pointer;
 }
 .atlas-home .primary-button:hover {
-  background: #0c4c3b;
+  background: var(--primary-hover);
 }
 .atlas-home .search-hint {
   font-size: 14px;
   margin: 14px 0 0;
-  color: #6d8177;
+  color: var(--muted);
   gap: 10px;
   justify-content: flex-start;
 }
@@ -102,7 +102,7 @@
   border: 0;
   border-radius: 0;
   padding: 0;
-  color: #226b54;
+  color: var(--primary);
   font: inherit;
   line-height: inherit;
   vertical-align: baseline;
@@ -137,11 +137,11 @@
   padding: 24px 0 30px;
   border: 0;
   font-size: 12px;
-  color: #87998f;
+  color: var(--muted);
 }
 .atlas-home button:focus-visible,
 .atlas-home a:focus-visible {
-  outline: 2px solid #14634f;
+  outline: 2px solid var(--primary);
   outline-offset: 5px;
 }
 .atlas-home .accession-error {
@@ -208,7 +208,7 @@
   margin: 0;
   flex-shrink: 0;
   padding: 16px 0;
-  border-top: 1px solid #cdded5;
+  border-top: 1px solid var(--border);
   background: transparent;
 }
 .logo-filters {
@@ -234,18 +234,18 @@
 }
 .lab-wordmark {
   padding-left: 32px;
-  border-left: 1px solid #cdded5;
+  border-left: 1px solid var(--border);
 }
 .lab-wordmark p {
   margin: 0 0 10px;
-  color: #315f50;
+  color: var(--secondary);
   font-size: 15px;
   line-height: 1.5;
 }
 .lab-wordmark > span {
   font-size: 12px;
   letter-spacing: 0.3px;
-  color: #71877c;
+  color: var(--muted);
 }
 @media (max-width: 700px) {
   .atlas-home .home-lab {
