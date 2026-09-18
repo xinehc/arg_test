@@ -5,9 +5,9 @@
   <title>ARG atlas</title>
   <meta name="description" content="Search accessions or resistance subtypes and explore antibiotic resistance gene abundance and sample metadata.">
   <link rel="icon" href="./favicon.svg?v=greenwich-coastlines-3"><link rel="stylesheet" href="./assets/style.css"><link rel="stylesheet" href="./assets/home.css?v=compact-spacing-1">
-  <script type="module" src="./assets/search.mjs?v=static-profiles-1"></script><script type="module" src="./assets/globe.mjs?v=forest-2"></script>
+  <script type="module" src="./assets/search.mjs?v=consistent-errors-1"></script><script type="module" src="./assets/globe.mjs?v=forest-2"></script>
   <link rel="stylesheet" href="./assets/subtype-search.css?v=search-navigation-1">
-  <script type="module" src="./assets/subtype-search.mjs?v=tsv-index-1"></script>
+  <script type="module" src="./assets/subtype-search.mjs?v=consistent-errors-1"></script>
 </head>
 <body class="atlas-home">
   <div class="globe-background" aria-hidden="true"><canvas id="globe"></canvas></div>
@@ -26,18 +26,19 @@
           <div id="accession-search-panel">
             <form id="search-form" class="accession-form">
             <label for="accession">Search an accession</label>
-            <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="accession" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="100" placeholder="Enter accession, e.g. DRR815000" required><button id="submit" class="primary-button" type="submit"><span class="search-button-label">Search</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-4 5 4-5 4"/></svg></button></div>
+            <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="accession" aria-describedby="error" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="100" placeholder="Enter accession, e.g. DRR815000" required><button id="submit" class="primary-button" type="submit"><span class="search-button-label">Search</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-4 5 4-5 4"/></svg></button></div>
             </form>
             <p id="error" class="accession-error" role="alert" hidden></p>
           </div>
           <div id="subtype-search-panel" hidden>
             <form class="accession-form subtype-search-form" data-subtype-search>
               <label for="subtype-query-home">Search a subtype</label>
-              <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="subtype-query-home" type="search" autocomplete="off" spellcheck="false" placeholder="Enter subtype, e.g. mcr-1" required aria-describedby="subtype-help-home"><button class="primary-button" type="submit"><span class="search-button-label">Search</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-4 5 4-5 4"/></svg></button></div>
+              <div class="search-entry"><span class="search-symbol" aria-hidden="true">⌕</span><input id="subtype-query-home" type="search" autocomplete="off" spellcheck="false" placeholder="Enter subtype, e.g. mcr-1" required aria-describedby="subtype-help-home subtype-error"><button class="primary-button" type="submit"><span class="search-button-label">Search</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-4 5 4-5 4"/></svg></button></div>
               <p class="sr-only" id="subtype-help-home">Search by subtype or type|subtype. Results distinguish the resistance type.</p>
               <p class="subtype-search-status" data-search-status role="status"></p>
               <ul class="subtype-results" data-results aria-label="Matching subtypes"></ul>
             </form>
+            <p id="subtype-error" class="accession-error" role="alert" hidden></p>
           </div>
             <div class="search-hint"><span id="example-wrap">Try an example <button id="example" type="button">DRR815000</button>, or </span><span id="subtype-example-wrap">Try an example <button id="subtype-example" type="button">mcr-1</button>, or </span><span>download the full profiles from <a id="full-profiles" href="https://zenodo.org/records/22330481">Zenodo</a>.</span></div>
         </div>

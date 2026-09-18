@@ -1,15 +1,23 @@
+import {setSearchBusy} from './search-state.mjs';
 import {el} from './common.mjs?v=static-profiles-1';
 import {findSubtypes, loadSubtypeCatalog, subtypeUrl} from './subtype-data.mjs?v=tsv-index-1';
 
 export function setupSubtypeSearch(form) {
   const input = form.querySelector('input'), results = form.querySelector('[data-results]');
   const status = form.querySelector('[data-search-status]');
+  const submit = form.querySelector('button[type="submit"]');
+  const errorPanel = form.parentElement.querySelector('#subtype-error');
+  function clearError() { errorPanel.hidden = true; errorPanel.textContent = ''; input.removeAttribute('aria-invalid'); }
+  function showError(message) { errorPanel.textContent = message; errorPanel.hidden = false; input.setAttribute('aria-invalid', 'true'); }
   let generation = 0;
   async function search(navigate = false) {
     const current = ++generation, query = input.value.trim();
     results.replaceChildren();
+    clearError();
+    setSearchBusy(submit, false);
     if (!query) { status.textContent = ''; return; }
     status.textContent = '';
+    if (navigate) setSearchBusy(submit, true);
     try {
       const entries = await loadSubtypeCatalog();
       if (current !== generation) return;
@@ -18,7 +26,8 @@ export function setupSubtypeSearch(form) {
         `${entry.type}|${entry.subtype}`.toLowerCase() === query.toLowerCase());
       const choices = exact.length ? exact : matches;
       if (navigate && choices.length === 1) { location.assign(subtypeUrl(choices[0])); return; }
-      status.textContent = matches.length ? `${matches.length.toLocaleString()} matching type/subtype pair${matches.length === 1 ? '' : 's'}. ${matches.length > 12 ? 'Showing the first 12; refine your search.' : 'Choose a result below.'}` : 'No matching subtypes. Try another name or type|subtype.';
+      status.textContent = matches.length ? `${matches.length.toLocaleString()} matching type/subtype pair${matches.length === 1 ? '' : 's'}. ${matches.length > 12 ? 'Showing the first 12; refine your search.' : 'Choose a result below.'}` : '';
+      if (!matches.length && navigate) showError('No matching subtype. Check the subtype and try again.');
       for (const entry of matches.slice(0, 12)) {
         const link = el('a', 'subtype-result'); link.href = subtypeUrl(entry);
         const name = el('span', 'subtype-result-name');
@@ -27,15 +36,17 @@ export function setupSubtypeSearch(form) {
         const item = el('li'); item.append(link); results.append(item);
       }
     } catch (error) {
-      if (current === generation) status.textContent = error.message;
+      if (current === generation && navigate) showError(error.message);
+    } finally {
+      if (current === generation) setSearchBusy(submit, false);
     }
   }
   input.addEventListener('input', () => { void search(); });
   form.addEventListener('submit', event => { event.preventDefault(); void search(true); });
-  return () => { ++generation; results.replaceChildren(); status.textContent = ''; };
+  return () => { ++generation; clearError(); results.replaceChildren(); status.textContent = ''; setSearchBusy(submit, false); };
 }
 
-for (const form of document.querySelectorAll('[data-subtype-search]')) setupSubtypeSearch(form);
+const resetSubtypeSearches = [...document.querySelectorAll('[data-subtype-search]')].map(setupSubtypeSearch);
 document.querySelector('#subtype-example')?.addEventListener('click', () => {
   const input = document.querySelector('#subtype-query-home');
   input.value = 'mcr-1';
@@ -50,6 +61,7 @@ function syncSearchMode(focus = false) {
   document.querySelector('#subtype-search-panel').hidden = !subtype;
   // Cancel an in-flight accession lookup before it can navigate from subtype mode.
   document.querySelector('#accession').dispatchEvent(new Event('input'));
+  for (const reset of resetSubtypeSearches) reset();
   if (focus) document.querySelector(subtype ? '#subtype-query-home' : '#accession').focus();
 }
 for (const mode of modes) mode.addEventListener('change', () => syncSearchMode(true));
