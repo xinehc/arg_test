@@ -2,10 +2,10 @@ import {gunzipSync} from 'node:zlib';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile, readdir} from 'node:fs/promises';
-import {pairKey, subtypeUrl, findSubtypes, coordinates, parseSubtypeFile, SUBTYPE_TYPES, subtypeBatchEntries, subtypeRecords, loadSubtype, loadSubtypeCatalog} from '../site/assets/subtype-data.mjs';
+import {pairKey, subtypeUrl, findSubtypes, coordinates, parseSubtypeFile, parseSubtypeIndex, loadSubtype, loadSubtypeCatalog} from '../site/assets/subtype-data.mjs';
 const root = new URL('../site/data/subtypes/', import.meta.url);
-const batches = new Map(await Promise.all(SUBTYPE_TYPES.map(async type => [type, gunzipSync(await readFile(new URL(encodeURIComponent(type + '.txt.gz'), root))).toString('utf8')])));
-const entries = [...batches].flatMap(([type, text]) => subtypeBatchEntries(text, type));
+const indexText = await readFile(new URL('index.tsv', root), 'utf8');
+const entries = parseSubtypeIndex(indexText);
 
 test('duplicate subtype names remain separate type/subtype pairs', () => {
   for (const [name, types] of [['bcrB', ['bacitracin', 'biocide']], ['cprA', ['bacteriocin', 'colistin']]]) {
@@ -36,20 +36,17 @@ test('coordinates include zero and boundaries but reject missing or invalid valu
   assert.deepEqual(coordinates(' -90 180 '), {lat: -90, lon: 180});
   for (const value of ['na', '', '91 0', '0 -181', '0', 'Infinity 0', '1 2 3', '0x10 0']) assert.equal(coordinates(value), null);
 });
-test('all type batches preserve identities, counts, numeric values, and slash names', async () => {
-  assert.deepEqual((await readdir(root)).filter(name => name.endsWith('.txt.gz')).sort(), SUBTYPE_TYPES.map(type => type + '.txt.gz').sort());
+test('all indexed files preserve identities, counts, numeric values, and slash names', async () => {
+  assert.deepEqual((await readdir(root)).filter(name => name.endsWith('.txt.gz')).sort(), entries.map(entry => entry.file).sort());
   assert.equal(entries.length, 1123);
   assert.equal(new Set(entries.map(entry => pairKey(entry.type, entry.subtype))).size, entries.length);
   let total = 0;
-  for (const [type, text] of batches) {
-    const metadata = subtypeBatchEntries(text, type);
-    let index = 0;
-    for (const record of subtypeRecords(text)) {
-      const entry = metadata[index++], rows = parseSubtypeFile(record, entry);
-      assert.equal(rows.length, entry.shown);
-      assert.ok(rows.every(row => row.subtype === `${entry.type}|${entry.subtype}`));
-      total += rows.length;
-    }
+  for (const entry of entries) {
+    const text = gunzipSync(await readFile(new URL(entry.file, root))).toString('utf8');
+    const rows = parseSubtypeFile(text, entry);
+    assert.equal(rows.length, entry.shown);
+    assert.ok(rows.every(row => row.subtype === `${entry.type}|${entry.subtype}`));
+    total += rows.length;
   }
   assert.equal(total, 986473);
   for (const name of ['qacA/B', 'qacF/L', 'blaCMA/CSA', 'blaLCR/NPS']) {
@@ -58,15 +55,21 @@ test('all type batches preserve identities, counts, numeric values, and slash na
     assert.equal(new URL(subtypeUrl(entry), 'https://example.org').searchParams.get('subtype'), name);
   }
 });
-test('batch parser rejects duplicate pairs, wrong types and invalid metadata', () => {
-  const first = [...subtypeRecords(batches.get('colistin'))][0];
-  assert.throws(() => subtypeBatchEntries(first + first, 'colistin'), /Duplicate/);
-  assert.throws(() => subtypeBatchEntries(first, 'biocide'), /type/);
-  assert.throws(() => subtypeBatchEntries(first.replace('matched\t2529', 'matched\tbad')), /counts/);
-  assert.throws(() => subtypeBatchEntries('unexpected\n' + first), /before metadata/);
-  assert.deepEqual(subtypeBatchEntries('\uFEFF'+first.replaceAll('\n', '\r\n')), subtypeBatchEntries(first));
+test('TSV index rejects unsafe filenames, duplicate identities and invalid counts', () => {
+  const header='type\tsubtype\tmatched\tshown\tfile\n', row='A\tgene/x\t2\t1\t0000.txt.gz\n';
+  assert.throws(() => parseSubtypeIndex(header+row+row), /Duplicate/);
+  for (const file of ['../0000.txt.gz','https://other/0000.txt.gz','a/b.txt.gz','a\\b.txt.gz']) {
+    assert.throws(() => parseSubtypeIndex(header+row.replace('0000.txt.gz',file)), /filename/);
+  }
+  assert.throws(() => parseSubtypeIndex(header+row.replace('\t2\t1\t','\t0\t1\t')), /counts/);
+  assert.deepEqual(parseSubtypeIndex('\uFEFF'+(header+row).replaceAll('\n','\r\n')),parseSubtypeIndex(header+row));
 });
-test('direct lookup fetches one type batch and search uses no JSON index', async () => {
+test('selected file must match index identity and row count', async () => {
+  const entry=entries[0], text=gunzipSync(await readFile(new URL(entry.file,root))).toString('utf8');
+  assert.throws(()=>parseSubtypeFile(text,{...entry,subtype:'other'}),/does not match/);
+  assert.throws(()=>parseSubtypeFile(text,{...entry,shown:entry.shown-1}),/row count/);
+});
+test('search downloads only TSV; lookup downloads only the selected gzip', async () => {
   const originalFetch = globalThis.fetch, requested = [];
   globalThis.fetch = async url => {
     const name = decodeURIComponent(new URL(url).pathname.split('/').pop());
@@ -74,14 +77,16 @@ test('direct lookup fetches one type batch and search uses no JSON index', async
     return new Response(await readFile(new URL(encodeURIComponent(name), root)));
   };
   try {
-    const {entry, samples} = await loadSubtype('biocide', 'qacA/B');
-    assert.equal(entry.subtype, 'qacA/B');
-    assert.equal(samples.length, entry.shown);
-    assert.deepEqual(requested, ['biocide.txt.gz']);
-    await assert.rejects(loadSubtype('biocide', 'not-a-subtype'), /not found/);
-    await assert.rejects(loadSubtype('../other', 'qacA/B'), /not found/);
     const catalog = await loadSubtypeCatalog();
     assert.equal(catalog.length, entries.length);
-    assert.ok(requested.every(name => name.endsWith('.txt.gz')));
+    assert.deepEqual(requested,['index.tsv']);
+    const expected=entries.find(entry=>entry.type==='biocide'&&entry.subtype==='qacA/B');
+    const {entry, samples} = await loadSubtype('biocide', 'qacA/B');
+    assert.deepEqual(entry,expected);
+    assert.equal(samples.length, entry.shown);
+    assert.deepEqual(requested,['index.tsv',expected.file]);
+    await assert.rejects(loadSubtype('biocide', 'not-a-subtype'), /not found/);
+    await assert.rejects(loadSubtype('../other', 'qacA/B'), /not found/);
+    assert.equal(requested.length,2);
   } finally { globalThis.fetch = originalFetch; }
 });

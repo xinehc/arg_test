@@ -38,26 +38,29 @@ The profile loader reads `./data/profiles/` directly and uses the final three ac
 
 ## Subtype files
 
-`site/data/subtypes/` contains 45 type batches, such as `colistin.txt.gz` and `biocide.txt.gz`. Each batch concatenates subtype records with `[metadata]` and `[data]` sections:
+`site/data/subtypes/index.tsv` lists each type/subtype pair, its counts, and its individual gzip filename:
+
+```tsv
+type	subtype	matched	shown	file
+albicidin	albA	49063	1000	0000.txt.gz
+```
+
+Each gzip contains one subtype record:
 
 ```text
 [metadata]
-type	biocide
-subtype	qacA/B
-matched	1234
-shown	1000
+type	albicidin
+subtype	albA
 
 [data]
 subtype	copy	abundance	accession	scientific_name	biome	geo_loc_name	collection_date	lat_lon
 ```
 
-The counts above illustrate the format. The supplied batches contain 1,123 pairs and 986,473 sample rows, with up to 1,000 supplied samples per pair. Full matched counts are separate from supplied sample counts. The table and map cover only supplied samples; missing coordinates never remove rows from the table. Missing subtype abundance (`nan`) displays “Not available”, sorts after measured values, and is preserved in downloads.
+Search loads only the approximately 50 KB TSV index. Opening a result reads the index and fetches only its selected gzip file. Counts come from the index; the reader checks the file's exact type/subtype identity, supplied row count, columns, unique sample accessions, and numeric values. Optional counts in file metadata must also match the index. Individual subtype files have a 5 MB compressed/expanded limit; the index has a 1 MB limit.
 
-The complete `(type, subtype)` pair is the identity. Names such as `bacitracin|bcrB` and `biocide|bcrB` remain separate. Metadata preserves original subtype names including `/`; subtype names are never converted into filenames.
+The complete `(type, subtype)` pair remains the identity. For example, `bacitracin|bcrB` and `biocide|bcrB` remain separate. Original spelling, including `/`, is preserved in metadata and URLs; numeric filenames avoid special-character issues. There is no hardcoded type list or JSON index. Update the TSV index alongside its gzip files when changing the dataset.
 
-Opening a subtype fetches just its resistance type's `.txt.gz` batch and selects the exact pair between successive `[metadata]` markers. The reader verifies the selected record's counts, columns, sample identities, and numeric values. Each batch has a 32 MB compressed/expanded limit.
-
-Search reads metadata directly from all type batches, with at most three concurrent loads. It keeps only the names/counts in memory; sample text is discarded. The first search downloads about 14 MB of compressed data. There is no generated JSON index or build step. Static hosts cannot list directories, so the 45 resistance type names are listed in `SUBTYPE_TYPES` in `site/assets/subtype-data.mjs`. Update that list when adding or removing a type file; changing subtypes within an existing type needs no code change.
+The supplied files contain 1,123 pairs and 986,473 sample rows, with up to 1,000 supplied samples per pair. Full matched counts are separate from supplied counts. The table and map cover supplied samples; missing coordinates never remove table rows. Missing abundance (`nan`) displays “Not available”, sorts after measured values, and is preserved in downloads.
 
 TSV downloads preserve the supplied values, and accession links use local profile batches.
 
@@ -69,12 +72,12 @@ Use a current Node.js with built-in fetch and DecompressionStream:
 node --test tests/*.test.mjs
 ```
 
-Tests cover accession matching, cache isolation, gzip limits, missing values, subtype name collisions, slash-containing names, direct batch lookup, and every supplied subtype record. They read the current batches without a separate examples directory or generated catalog.
+Tests cover accession matching, cache isolation, gzip limits, missing values, subtype name collisions, slash-containing names, indexed subtype lookup, and every supplied subtype record. Tests validate the TSV index against all referenced gzip files.
 
 ## Deployment
 
 Publish the contents of `site/` using any static host with sufficient capacity. The GitHub Pages workflow runs the Node tests and uploads that directory directly. For an existing GitHub repository, enable Pages → GitHub Actions and push your changes to `main`. `scripts/deploy_github.sh OWNER/REPO --public` is an optional helper for creating a new repository.
 
-The current complete site occupies approximately 646 MB. No gzip repacking or generated catalog is required for the supplied batches.
+The current complete site occupies approximately 646 MB. No gzip repacking or index-generation build step is needed; the supplied TSV index is published directly.
 
 The globe uses the bundled `site/assets/globe/locations.tsv` and land mask, with a transparent decorative canvas, random rotation, no drag/zoom controls, and reduced-motion support. The existing type filter, abundance formatting, and profile display remain in place. The website and its data are publicly readable when published.

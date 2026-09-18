@@ -1,4 +1,4 @@
-import {subtypeUrl} from './subtype-data.mjs?v=type-batches-1';
+import {subtypeUrl} from './subtype-data.mjs?v=tsv-index-1';
 import {formatAbundance,matchesTypes} from './chart-utils.mjs?v=abundance-precision-4';
 import {showMetadata} from './metadata.mjs?v=readable-labels-1';
 import {normalizeAccession,loadProfile,el} from './common.mjs?v=static-profiles-1';

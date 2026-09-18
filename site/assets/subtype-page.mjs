@@ -1,7 +1,7 @@
 import {buildLandCells, LAND_COLUMNS} from './globe-land.mjs?v=shared-grid-1';
 import {el} from './common.mjs?v=static-profiles-1';
 import {formatAbundance} from './chart-utils.mjs?v=abundance-precision-4';
-import {coordinates, loadSubtype, sampleNumber} from './subtype-data.mjs?v=type-batches-1';
+import {coordinates, loadSubtype, sampleNumber} from './subtype-data.mjs?v=tsv-index-1';
 
 const $ = id => document.getElementById(id);
 let samples = [], selected, excludeNaBiomes = false;
